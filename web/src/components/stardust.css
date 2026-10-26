@@ -1,0 +1,50 @@
+.sd-layer,
+.sd-lines {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sd-lines line {
+  stroke: color-mix(in srgb, var(--star) 70%, var(--ink));
+  stroke-width: 1;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--star) 60%, transparent));
+}
+
+.sd-star,
+.sd-ring,
+.sd-spark {
+  position: absolute;
+  will-change: transform, opacity;
+}
+.sd-star {
+  width: 18px;
+  height: 18px;
+}
+.sd-star svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--star);
+  filter: drop-shadow(0 0 6px var(--star)) drop-shadow(0 0 14px color-mix(in srgb, var(--star) 50%, transparent));
+}
+.sd-ring {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--star) 55%, transparent);
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--star) 40%, transparent) inset;
+}
+.sd-spark {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--star) 60%, #fff);
+  box-shadow: 0 0 6px var(--star);
+}
+:root[data-theme='dawn'] .sd-spark {
+  background: var(--star);
+}

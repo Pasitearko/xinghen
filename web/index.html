@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <title>飞星</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // 首帧之前写好主题，避免先闪一下错误的底色
+      ;(function () {
+        try {
+          var p = JSON.parse(localStorage.getItem('feixing.prefs') || '{}')
+          var t = p.theme
+          if (t !== 'night' && t !== 'dawn') t = matchMedia('(prefers-color-scheme: light)').matches ? 'dawn' : 'night'
+          document.documentElement.dataset.theme = t
+        } catch (e) {
+          document.documentElement.dataset.theme = 'night'
+        }
+      })()
+    </script>
+    <style>
+      html { background: #0d1530; }
+      html[data-theme='dawn'] { background: #d9e3f0; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

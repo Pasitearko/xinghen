@@ -1,0 +1,93 @@
+.pal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+}
+.pal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  background: var(--glass-strong);
+  overflow: hidden;
+}
+.pal-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+}
+.pal-input input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font-size: var(--fs-lg);
+  font-family: var(--serif);
+}
+.pal-input input:focus-visible {
+  box-shadow: none;
+}
+kbd {
+  font-family: var(--sans);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--glass-edge-hi);
+  color: var(--ink-3);
+}
+.pal-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  max-height: 56vh;
+  overflow-y: auto;
+}
+.pal-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: var(--r-row);
+}
+.pal-item > *:not(.pal-sel) {
+  position: relative;
+}
+.pal-sel {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--row-hover);
+}
+.pal-icon {
+  color: var(--star);
+  display: grid;
+}
+.pal-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pal-title {
+  font-size: var(--fs-sm);
+}
+.pal-sub {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pal-enter {
+  color: var(--ink-3);
+}

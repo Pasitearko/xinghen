@@ -1,0 +1,274 @@
+.rail {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--rail-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 22px;
+}
+
+.rail-brand {
+  display: grid;
+  place-items: center;
+  margin-bottom: 36px;
+}
+.rail-brand-text {
+  writing-mode: vertical-rl;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  color: var(--ink);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--star) 40%, transparent);
+}
+
+.rail-list {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+/* 星座连线 */
+.rail-line {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  bottom: 40px;
+  width: 1px;
+  transform: translateX(-0.5px);
+  background: linear-gradient(180deg, transparent, var(--glass-edge-hi) 12%, var(--glass-edge-hi) 88%, transparent);
+  opacity: 0.6;
+}
+
+.rail-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+  padding: 4px 0;
+  color: var(--ink-3);
+  transition: color var(--dur-2);
+}
+.rail-item:hover,
+.rail-item--on {
+  color: var(--ink);
+}
+.rail-node {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  /* 遮住连线，让星像穿在线上 */
+  background: radial-gradient(closest-side, var(--sky-top) 55%, transparent 56%);
+}
+.rail-glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--star) 45%, transparent), color-mix(in srgb, var(--star) 10%, transparent) 60%, transparent);
+}
+.rail-star {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: transform var(--dur-3) var(--ease-out), fill var(--dur-2), filter var(--dur-2);
+}
+.rail-item:hover .rail-star {
+  transform: scale(1.25) rotate(45deg);
+}
+.rail-star--on {
+  width: 20px;
+  height: 20px;
+  fill: var(--star);
+  filter: drop-shadow(0 0 6px var(--star));
+}
+.rail-item--on:hover .rail-star {
+  transform: rotate(45deg);
+}
+.rail-label {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.12em;
+}
+
+.rail-tools {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rail-tool {
+  color: var(--ink-3);
+}
+
+/* 底部停靠栏（窄屏） */
+.dock {
+  display: none;
+}
+@media (max-width: 900px) {
+  .rail {
+    display: none;
+  }
+  /* 带上 .glass 提高优先级，否则会被 .glass 的 position: relative 覆盖 */
+  .dock.glass {
+    position: fixed;
+    z-index: 30;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    padding: 6px;
+    border-radius: 22px;
+    background: var(--glass-strong);
+  }
+  .dock-item {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0 5px;
+    border-radius: 16px;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .dock-item > * {
+    position: relative;
+  }
+  .dock-item--on {
+    color: var(--ink);
+  }
+  .dock-pill {
+    position: absolute !important;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--star-soft);
+  }
+  .dock-item .rail-star {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.rail-timer {
+  color: var(--star);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* 落款：星轨底部一颗很暗的小星 */
+.sig {
+  position: relative;
+  margin-top: 14px;
+}
+.sig-star {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--ink-3);
+  opacity: 0.38;
+  transition: opacity var(--dur-2), color var(--dur-2), transform var(--dur-3) var(--ease-out);
+}
+.sig-star svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+.sig-star:hover,
+.sig-star--on {
+  opacity: 1;
+  color: var(--star);
+  transform: rotate(45deg) scale(1.2);
+}
+.sig-card {
+  position: absolute;
+  left: calc(100% + 18px);
+  bottom: -6px;
+  width: 290px;
+  padding: 16px 14px 12px;
+  border-radius: 18px;
+  background: var(--glass-strong);
+  transform-origin: left bottom;
+}
+.sig-line {
+  padding: 0 8px 10px;
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--r-row);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  text-align: left;
+  transition: background var(--dur-1), color var(--dur-1);
+}
+.contact-row:hover {
+  background: var(--row-hover);
+  color: var(--ink);
+}
+.contact-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.contact-go {
+  opacity: 0;
+  transition: opacity var(--dur-1);
+}
+.contact-row:hover .contact-go {
+  opacity: 0.7;
+}
+
+/* 窗口矮的时候收紧星轨间距，免得底部工具压到栏目上 */
+@media (max-height: 820px) {
+  .rail {
+    padding: 18px 0 14px;
+  }
+  .rail-brand {
+    margin-bottom: 20px;
+  }
+  .rail-list {
+    gap: 8px;
+  }
+  .rail-tools {
+    gap: 2px;
+  }
+  .sig {
+    margin-top: 6px;
+  }
+}
+@media (min-width: 1680px) {
+  .rail-item {
+    width: 76px;
+  }
+  .rail-brand-text {
+    font-size: 26px;
+  }
+}

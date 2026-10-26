@@ -1,0 +1,641 @@
+/* 飞星 · 星夜手帐
+   夜：靛蓝天幕上的月白文字，星芒金只给「此刻/选中/保存」这类要被看见的东西。
+   晨：拂晓的蓝粉天光，墨色文字，金色压暗成铜。 */
+
+:root {
+  --serif: 'Feixing Serif', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
+  --sans: 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --kai: 'LXGW WenKai', 'LXGW WenKai Mono', '霞鹜文楷', 'Kaiti SC', 'KaiTi', 'STKaiti', var(--serif);
+  --mono: 'Maple Mono NF CN', 'JetBrains Mono', 'Noto Sans Mono CJK SC', ui-monospace, monospace;
+
+  /* 字号：1.25 比例，正文 16 */
+  --fs-xs: 12px;
+  --fs-sm: 13.5px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 25px;
+  --fs-2xl: 32px;
+  --fs-3xl: 44px;
+  --fs-4xl: 64px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-1: 160ms;
+  --dur-2: 320ms;
+  --dur-3: 640ms;
+
+  /* 圆角按层级：天幕上的大面板 > 面板里的行 > 胶囊 */
+  --r-panel: 22px;
+  --r-row: 12px;
+  --r-pill: 999px;
+
+  --rail-w: 84px;
+}
+
+:root,
+:root[data-theme='night'] {
+  color-scheme: dark;
+  --sky-top: #0b1330;
+  --sky-mid: #142046;
+  --sky-low: #22295a;
+  --horizon: #3d3466;
+
+  --ink: #e6ecf5;
+  --ink-2: #a9b5cc;
+  --ink-3: #75839f;
+  --star: #f0c987;
+  --star-ink: #1b1630;
+  --star-soft: rgba(240, 201, 135, 0.16);
+  --tide: #8fd3d9;
+  --tide-soft: rgba(143, 211, 217, 0.14);
+  --rouge: #e88a9a;
+  --rouge-soft: rgba(232, 138, 154, 0.14);
+
+  --glass: rgba(24, 33, 68, 0.52);
+  --glass-strong: rgba(20, 28, 60, 0.78);
+  --glass-edge: rgba(190, 205, 240, 0.13);
+  --glass-edge-hi: rgba(220, 230, 255, 0.24);
+  --row: rgba(200, 215, 255, 0.055);
+  --row-hover: rgba(200, 215, 255, 0.1);
+  --line: rgba(200, 215, 255, 0.1);
+  --paper: rgba(16, 23, 50, 0.72);
+  --scrim: rgba(6, 10, 26, 0.55);
+  --shadow: 0 24px 60px -28px rgba(2, 4, 16, 0.75), 0 2px 6px -2px rgba(2, 4, 16, 0.35);
+  --focus: 0 0 0 2px var(--sky-mid), 0 0 0 4px var(--star);
+}
+
+:root[data-theme='dawn'] {
+  color-scheme: light;
+  --sky-top: #c9d8ec;
+  --sky-mid: #dce4f1;
+  --sky-low: #ece4ec;
+  --horizon: #f5ddd2;
+
+  --ink: #1c2540;
+  --ink-2: #4c5875;
+  --ink-3: #7a849c;
+  --star: #a8741f;
+  --star-ink: #fffaf0;
+  --star-soft: rgba(168, 116, 31, 0.13);
+  --tide: #23797f;
+  --tide-soft: rgba(35, 121, 127, 0.11);
+  --rouge: #b9475c;
+  --rouge-soft: rgba(185, 71, 92, 0.1);
+
+  --glass: rgba(255, 255, 255, 0.5);
+  --glass-strong: rgba(250, 251, 255, 0.86);
+  --glass-edge: rgba(60, 80, 130, 0.12);
+  --glass-edge-hi: rgba(255, 255, 255, 0.85);
+  --row: rgba(40, 60, 110, 0.045);
+  --row-hover: rgba(40, 60, 110, 0.085);
+  --line: rgba(40, 60, 110, 0.1);
+  --paper: rgba(255, 255, 255, 0.74);
+  --scrim: rgba(60, 70, 100, 0.28);
+  --shadow: 0 24px 60px -30px rgba(40, 50, 90, 0.4), 0 2px 6px -2px rgba(40, 50, 90, 0.12);
+  --focus: 0 0 0 2px #fff, 0 0 0 4px var(--star);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--sky-top);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--star-soft);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: 8px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+/* 滚动条细一点，和天幕融在一起 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- 外壳 ---------- */
+.shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding-left: var(--rail-w);
+}
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 44px 40px 120px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: var(--fs-3xl);
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+
+.page-sub {
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+@media (min-width: 1280px) {
+  .page {
+    max-width: 1480px;
+  }
+}
+/* 大屏（主要按 2560 宽的显示器设计）：字号整体放大一档，页面放开宽度 */
+@media (min-width: 1680px) {
+  :root {
+    --fs-xs: 12.5px;
+    --fs-sm: 14.5px;
+    --fs-md: 17px;
+    --fs-lg: 21px;
+    --fs-xl: 27px;
+    --fs-2xl: 36px;
+    --fs-3xl: 56px;
+    --fs-4xl: 80px;
+    --r-panel: 26px;
+    --rail-w: 96px;
+  }
+  .page {
+    max-width: 2320px;
+    padding: 56px clamp(48px, 3.4vw, 96px) 120px;
+  }
+  .page-head {
+    margin-bottom: 40px;
+  }
+  .panel-pad {
+    padding: 26px 30px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --rail-w: 0px;
+  }
+  .page {
+    padding: 28px 16px 140px;
+  }
+  .page-title {
+    font-size: var(--fs-2xl);
+  }
+}
+
+/* ---------- 玻璃面板 ---------- */
+.glass {
+  position: relative;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+
+/* 进场：每块面板自己淡入上浮，而不是给外层容器做透明度动画（那样毛玻璃会失效）。
+   位移用独立的 translate 属性，不和 motion 写的 transform 打架；只填充 backwards，结束后不留样式。 */
+main .glass,
+main .rise,
+main .page-head {
+  animation: rise 640ms var(--ease-out) backwards;
+}
+main .glass:nth-child(2),
+main .rise:nth-child(2) {
+  animation-delay: 70ms;
+}
+main .glass:nth-child(3),
+main .rise:nth-child(3) {
+  animation-delay: 140ms;
+}
+main .glass:nth-child(n + 4),
+main .rise:nth-child(n + 4) {
+  animation-delay: 200ms;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+/* 换栏目：整页快照交叉淡化（见 App.tsx 的 aroundNav） */
+html.vt-page::view-transition-old(root) {
+  animation: 240ms var(--ease-soft) both vt-fade-out;
+}
+html.vt-page::view-transition-new(root) {
+  animation: 360ms var(--ease-out) both vt-fade-in;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 顶边一道细高光，像玻璃边缘反光 */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--glass-edge-hi), transparent 38%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.panel-pad {
+  padding: 22px 24px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--serif);
+  font-size: var(--fs-lg);
+  font-weight: 400;
+  margin-bottom: 14px;
+}
+
+.muted {
+  color: var(--ink-2);
+}
+.faint {
+  color: var(--ink-3);
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  background: var(--row);
+  border: 1px solid var(--glass-edge);
+  transition: background var(--dur-1), border-color var(--dur-1), color var(--dur-1), opacity var(--dur-1);
+  white-space: nowrap;
+  user-select: none;
+}
+.btn:hover {
+  background: var(--row-hover);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.btn--primary {
+  background: var(--star);
+  color: var(--star-ink);
+  border-color: transparent;
+  font-weight: 500;
+}
+.btn--primary:hover {
+  background: var(--star);
+  filter: brightness(1.06);
+}
+.btn--danger {
+  color: var(--rouge);
+}
+.btn--danger:hover {
+  background: var(--rouge-soft);
+}
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn--sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: var(--fs-xs);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--ink-2);
+  transition: background var(--dur-1), color var(--dur-1);
+}
+.icon-btn:hover {
+  background: var(--row-hover);
+  color: var(--ink);
+}
+.icon-btn--sm {
+  width: 30px;
+  height: 30px;
+}
+
+/* ---------- 输入 ---------- */
+.field {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-row);
+  background: var(--row);
+  border: 1px solid var(--glass-edge);
+  outline: none;
+  transition: border-color var(--dur-1), background var(--dur-1);
+}
+.field:focus {
+  border-color: var(--star);
+  background: var(--row-hover);
+}
+textarea.field {
+  height: auto;
+  padding: 10px 14px;
+  resize: vertical;
+  line-height: 1.7;
+}
+.field::placeholder {
+  color: var(--ink-3);
+}
+
+.label {
+  display: block;
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+
+/* ---------- 搜索框 ---------- */
+.t-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--row);
+  border: 1px solid var(--glass-edge);
+  color: var(--ink-3);
+  transition: border-color var(--dur-1);
+}
+.t-search:focus-within {
+  border-color: var(--star);
+}
+.t-search input {
+  width: 200px;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+.t-search input:focus-visible {
+  box-shadow: none;
+}
+
+/* ---------- 胶囊 / 标签 ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  background: var(--row);
+  border: 1px solid transparent;
+  transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1);
+  white-space: nowrap;
+}
+button.chip:hover {
+  color: var(--ink);
+  background: var(--row-hover);
+}
+.chip--on {
+  color: var(--star);
+  background: var(--star-soft);
+  border-color: color-mix(in srgb, var(--star) 35%, transparent);
+}
+.tag {
+  font-size: var(--fs-xs);
+  color: var(--tide);
+}
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+.skeleton {
+  border-radius: var(--r-row);
+  background: linear-gradient(90deg, var(--row) 0%, var(--row-hover) 50%, var(--row) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s var(--ease-soft) infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ---------- Markdown 正文 ---------- */
+.prose {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.95;
+  color: var(--ink);
+  word-break: break-word;
+}
+.prose.kai {
+  font-family: var(--kai);
+  font-size: 18px;
+}
+.prose > * + * {
+  margin-top: 0.9em;
+}
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 1.4em;
+}
+.prose h1 {
+  font-size: 1.5em;
+}
+.prose h2 {
+  font-size: 1.3em;
+}
+.prose h3 {
+  font-size: 1.12em;
+}
+.prose p {
+  margin: 0;
+}
+.prose a {
+  color: var(--tide);
+  border-bottom: 1px solid color-mix(in srgb, var(--tide) 40%, transparent);
+}
+.prose blockquote {
+  margin: 0;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid var(--star);
+  color: var(--ink-2);
+}
+.prose img {
+  border-radius: var(--r-row);
+  margin: 0.6em 0;
+  max-height: 520px;
+  object-fit: contain;
+}
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--row-hover);
+}
+.prose pre {
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--row);
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+.prose hr {
+  border: 0;
+  height: 1px;
+  margin: 2em auto;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--ink-3), transparent);
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose li + li {
+  margin-top: 0.3em;
+}
+.prose table {
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.86em;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+}
+.prose input[type='checkbox'] {
+  accent-color: var(--star);
+}
+
+.nowrap {
+  white-space: nowrap;
+}

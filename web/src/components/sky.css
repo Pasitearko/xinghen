@@ -1,0 +1,177 @@
+.sky {
+  --px: 0;
+  --py: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.sky-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-low) 82%, var(--horizon) 118%);
+}
+
+.sky-horizon {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -38vh;
+  height: 70vh;
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--horizon) 70%, transparent), transparent 70%);
+  opacity: 0.75;
+}
+
+.sky-wallpaper {
+  position: absolute;
+  inset: -12px;
+  transition: opacity 900ms var(--ease-out);
+  transform: translate3d(calc(var(--px) * -10px), calc(var(--py) * -8px), 0);
+}
+.sky-wallpaper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sky-wallpaper-dim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-mid) 60%, var(--sky-low));
+  transition: opacity var(--dur-2);
+}
+
+/* ---------- 星点 ---------- */
+.sky-stars {
+  position: absolute;
+  inset: -16px;
+  transform: translate3d(calc(var(--px) * -14px), calc(var(--py) * -10px), 0);
+  transition: opacity 1.2s var(--ease-out);
+}
+.sky-stars canvas {
+  position: absolute;
+  inset: 16px;
+  width: calc(100% - 32px);
+  height: calc(100% - 32px);
+}
+.sky-stars-a {
+  animation: twinkle 7.5s ease-in-out infinite alternate;
+}
+.sky-stars-b {
+  animation: twinkle 11s ease-in-out -4s infinite alternate-reverse;
+}
+@keyframes twinkle {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+:root[data-theme='dawn'] .sky-stars {
+  opacity: 0.08;
+}
+
+/* ---------- 极光纱：大块柔和渐变缓慢漂移 ---------- */
+.sky-aurora {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(calc(var(--px) * -24px), calc(var(--py) * -12px), 0);
+  opacity: 0.9;
+}
+.sky-aurora span {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+.aurora-a {
+  width: 70vw;
+  height: 46vh;
+  left: -10vw;
+  top: 4vh;
+  background: radial-gradient(closest-side, rgba(92, 196, 190, 0.2), transparent);
+  animation: drift-a 58s ease-in-out infinite alternate;
+}
+.aurora-b {
+  width: 60vw;
+  height: 40vh;
+  right: -12vw;
+  top: -6vh;
+  background: radial-gradient(closest-side, rgba(126, 116, 220, 0.24), transparent);
+  animation: drift-b 72s ease-in-out infinite alternate;
+}
+.aurora-c {
+  width: 50vw;
+  height: 34vh;
+  left: 30vw;
+  top: 26vh;
+  background: radial-gradient(closest-side, rgba(220, 150, 190, 0.11), transparent);
+  animation: drift-c 84s ease-in-out infinite alternate;
+}
+:root[data-theme='dawn'] .aurora-a {
+  background: radial-gradient(closest-side, rgba(255, 214, 196, 0.55), transparent);
+}
+:root[data-theme='dawn'] .aurora-b {
+  background: radial-gradient(closest-side, rgba(186, 206, 240, 0.65), transparent);
+}
+:root[data-theme='dawn'] .aurora-c {
+  background: radial-gradient(closest-side, rgba(250, 236, 210, 0.6), transparent);
+}
+@keyframes drift-a {
+  to {
+    transform: translate3d(18vw, 6vh, 0) scale(1.15, 0.9) rotate(6deg);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate3d(-16vw, 10vh, 0) scale(0.9, 1.2) rotate(-8deg);
+  }
+}
+@keyframes drift-c {
+  to {
+    transform: translate3d(-12vw, -8vh, 0) scale(1.2) rotate(10deg);
+  }
+}
+
+/* ---------- 飞星 ---------- */
+.sky-meteors {
+  position: absolute;
+  inset: 0;
+}
+.meteor {
+  position: absolute;
+  height: 1.6px;
+  transform-origin: 0 50%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 246, 225, 1), rgba(240, 201, 135, 0.55) 18%, transparent);
+  filter: drop-shadow(0 0 6px rgba(240, 201, 135, 0.8));
+}
+.meteor::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: #fff8e8;
+  box-shadow: 0 0 10px 3px rgba(255, 230, 180, 0.8);
+}
+:root[data-theme='dawn'] .meteor {
+  background: linear-gradient(90deg, rgba(168, 116, 31, 0.9), rgba(168, 116, 31, 0.3) 20%, transparent);
+  filter: none;
+}
+:root[data-theme='dawn'] .meteor::before {
+  background: #c98f2e;
+  box-shadow: 0 0 8px 2px rgba(201, 143, 46, 0.5);
+}
+
+.sky-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,280 @@
+/* Tabs */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--row);
+  border: 1px solid var(--glass-edge);
+}
+.tab {
+  position: relative;
+  white-space: nowrap;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  transition: color var(--dur-2);
+}
+.tabs--sm .tab {
+  height: 26px;
+  padding: 0 11px;
+  font-size: var(--fs-xs);
+}
+.tab:hover {
+  color: var(--ink);
+}
+.tab--on {
+  color: var(--star-ink);
+}
+.tab-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--star);
+  box-shadow: 0 4px 16px -6px color-mix(in srgb, var(--star) 70%, transparent);
+}
+.tab-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab-count {
+  font-size: 11px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ticker */
+.ticker {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.digit {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  /* 上下留一点遮罩，滚动时像从纸缝里出来 */
+  mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+}
+.digit-col {
+  display: flex;
+  flex-direction: column;
+}
+.digit-col > span {
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+}
+.ticker-sep {
+  display: inline-block;
+}
+
+/* Check */
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+}
+.check-box {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border-radius: 7px;
+  border: 1.5px solid var(--ink-3);
+  overflow: hidden;
+}
+.check-fill {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--tide);
+}
+.check-tick {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--sky-top);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:root[data-theme='dawn'] .check-tick {
+  stroke: #fff;
+}
+.check-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.check-label {
+  position: relative;
+  align-self: flex-start;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.check-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 1.5px;
+  background: var(--ink-2);
+  transform-origin: left center;
+}
+.check-sub {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  width: 44px;
+  height: 26px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--row-hover);
+  border: 1px solid var(--glass-edge);
+  transition: background var(--dur-2);
+}
+.switch--on {
+  justify-content: flex-end;
+  background: var(--star);
+}
+.switch-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.switch--on .switch-knob {
+  background: var(--star-ink);
+}
+
+/* Sheet */
+.sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+.sheet-root--right {
+  place-items: stretch end;
+  padding: 12px;
+}
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  backdrop-filter: blur(3px);
+}
+.sheet {
+  position: relative;
+  width: 100%;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-strong);
+  overflow: hidden;
+}
+.sheet--right {
+  height: 100%;
+  max-height: none;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 6px 24px;
+}
+.sheet-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: var(--fs-xl);
+}
+.sheet-body {
+  padding: 12px 24px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.sheet-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--line);
+}
+
+/* Toasts */
+.toasts {
+  position: fixed;
+  z-index: 80;
+  right: 20px;
+  bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  background: var(--glass-strong);
+  pointer-events: auto;
+}
+.toast-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tide);
+  box-shadow: 0 0 10px var(--tide);
+}
+.toast--error .toast-dot {
+  background: var(--rouge);
+  box-shadow: 0 0 10px var(--rouge);
+}
+.toast--info .toast-dot {
+  background: var(--star);
+  box-shadow: 0 0 10px var(--star);
+}
+
+/* Spotlight 卡片 */
+.spot {
+  --mx: -400px;
+  --my: -400px;
+}
+.spot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx) var(--my), color-mix(in srgb, var(--star) 9%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-2);
+}
+.spot:hover::after {
+  opacity: 1;
+}

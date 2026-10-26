@@ -1,0 +1,224 @@
+.set-sec {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.set-sec:first-child {
+  padding-top: 4px;
+}
+.set-sec:last-child {
+  border-bottom: 0;
+}
+.set-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: var(--fs-md);
+  margin-bottom: 12px;
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+}
+.set-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.set-row > :last-child {
+  flex-shrink: 0;
+}
+.set-label {
+  font-size: var(--fs-sm);
+}
+.set-hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  line-height: 1.7;
+}
+.set-field {
+  display: block;
+  margin-bottom: 12px;
+}
+.set-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+}
+.set-range {
+  width: 150px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--star) var(--p), var(--row-hover) var(--p));
+}
+.set-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* 壁纸 */
+.walls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.wall {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  overflow: visible;
+}
+.wall-pick,
+.wall--sky,
+.wall--add {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.wall-pick img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.wall-pick:hover img {
+  transform: scale(1.06);
+}
+.wall-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px 6px 4px;
+  font-size: 10.5px;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+  text-align: left;
+}
+.wall--sky {
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-low));
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+.wall--add {
+  border: 1px dashed var(--glass-edge-hi);
+  color: var(--ink-3);
+  font-size: 11px;
+  gap: 2px;
+  align-content: center;
+  cursor: pointer;
+}
+.wall-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 15px;
+  border: 2px solid var(--star);
+  pointer-events: none;
+}
+.wall-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  opacity: 0;
+  transition: opacity var(--dur-1);
+}
+.wall:hover .wall-del {
+  opacity: 1;
+}
+
+/* 字体 */
+.fonts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.font-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--row);
+  border: 1px solid transparent;
+  font-size: var(--fs-xs);
+  transition: border-color var(--dur-2), background var(--dur-2);
+}
+.font-card--on {
+  border-color: color-mix(in srgb, var(--star) 50%, transparent);
+  background: var(--star-soft);
+}
+.font-sample {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--ink);
+}
+.font-sample.kai {
+  font-family: var(--kai);
+}
+.font-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--star);
+}
+
+/* 资讯来源 */
+.src-group {
+  margin-top: 12px;
+}
+.src-cat {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+.src {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+}
+.src-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.src-name {
+  font-size: var(--fs-sm);
+}
+.src-name:hover {
+  color: var(--star);
+}
+.src-status {
+  font-size: 11px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.src-status--bad {
+  color: var(--rouge);
+}

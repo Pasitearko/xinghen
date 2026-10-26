@@ -1,0 +1,44 @@
+{
+  "name": "xinghen",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "星痕：Linux 版飞星，本机运行的个人日记与生活空间",
+  "engines": {
+    "node": ">=23.6.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.ts",
+    "dev:web": "vite --config web/vite.config.ts",
+    "dev:server": "node --watch server/main.ts",
+    "build": "vite build --config web/vite.config.ts",
+    "start": "node server/main.ts",
+    "check": "tsc -p web/tsconfig.json && tsc -p server/tsconfig.json",
+    "test": "node --test server/test/*.test.ts"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3"
+  },
+  "devDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@lezer/common": "^1.5.4",
+    "@lezer/markdown": "^1.8.1",
+    "@tanstack/react-query": "^5.105.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "lucide-react": "^1.61.0",
+    "marked": "^18.1.1",
+    "motion": "^14.6.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "wouter": "^3.13.0"
+  }
+}

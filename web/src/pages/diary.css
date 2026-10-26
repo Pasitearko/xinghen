@@ -1,0 +1,622 @@
+.diary-head {
+  align-items: center;
+}
+.diary-date {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.diary-date .icon-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.diary-body {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+/* 书桌：左边篇目与灵感题（封存的日子是日历），中间信纸，右边页边。中等宽度时页边收到左栏下面 */
+.diary-desk {
+  grid-template-areas: 'side paper' 'margin paper';
+  grid-template-rows: auto 1fr;
+}
+.diary-desk > .diary-side {
+  grid-area: side;
+}
+.diary-desk > .composer,
+.diary-desk > .reader,
+.diary-desk > .reader-empty {
+  grid-area: paper;
+}
+.diary-desk > .diary-margin {
+  grid-area: margin;
+  align-self: start;
+}
+.diary-margin {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.margin-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: var(--fs-3xl);
+  line-height: 1;
+  color: var(--ink);
+}
+.margin-count small {
+  font-family: var(--sans);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+.margin-hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+.margin-hint.faint {
+  color: var(--ink-3);
+  margin-top: 10px;
+}
+.margin-pickers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.diary-margin .picker {
+  flex-direction: column;
+  gap: 6px;
+}
+.diary-margin .picker-label {
+  width: auto;
+  line-height: 1.4;
+}
+.margin-facts {
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: var(--fs-sm);
+}
+.margin-facts dt {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+.margin-facts dd {
+  margin: 2px 0 0;
+}
+.diary-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 24px;
+}
+
+/* 篇目列表 */
+.entries {
+  list-style: none;
+  margin: 0 -10px;
+  padding: 0;
+}
+.entry {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--r-row);
+  transition: background var(--dur-1);
+}
+.entry:hover {
+  background: var(--row);
+}
+.entry-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--star-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--star) 25%, transparent);
+}
+.entry > span:not(.entry-bg) {
+  position: relative;
+}
+.entry-idx {
+  font-family: var(--serif);
+  color: var(--star);
+  min-width: 1em;
+}
+.entry-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.entry-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.entry-meta {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+/* 信纸 */
+.paper {
+  background: var(--paper);
+  border-radius: 26px;
+  padding: 40px clamp(20px, 5vw, 64px) 28px;
+}
+.composer {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+.composer-title {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: none;
+  font-family: var(--serif);
+  font-size: var(--fs-2xl);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  padding: 0;
+}
+.composer-title + .editor {
+  margin-top: 14px;
+}
+.composer-title::placeholder {
+  color: var(--ink-3);
+}
+.picker {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.picker-label {
+  flex: none;
+  width: 32px;
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  line-height: 28px;
+}
+.picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip-input {
+  /* 宽度跟着内容（含占位文字）走，「加标签，回车确认」不会被截掉；不支持 field-sizing 的浏览器用固定宽度 */
+  width: 12em;
+  field-sizing: content;
+  min-width: 7em;
+  max-width: 100%;
+  outline: none;
+  border-color: var(--glass-edge);
+}
+.chip-input:focus {
+  border-color: var(--star);
+}
+.tag-chip {
+  color: var(--tide);
+  background: var(--tide-soft);
+}
+
+/* 编辑器 */
+.editor {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-row);
+  transition: box-shadow var(--dur-2);
+}
+.editor--drag {
+  box-shadow: 0 0 0 2px var(--star);
+}
+.editor-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0;
+  opacity: 0.55;
+  transition: opacity var(--dur-2);
+}
+.editor:focus-within .editor-bar,
+.editor-bar:hover {
+  opacity: 1;
+}
+.editor-bar label {
+  cursor: pointer;
+}
+.editor-up {
+  font-size: var(--fs-xs);
+  margin-left: 8px;
+}
+.editor-spacer {
+  flex: 1;
+}
+.editor-area {
+  flex: 1;
+  width: 100%;
+  max-width: 44em;
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--ink);
+}
+.editor-area.kai {
+  font-family: var(--kai);
+  font-size: 18px;
+}
+/* CodeMirror 的默认样式是等宽字体、带虚线焦点框，这里全部改回信纸的样子（选择器多一层，压过它的内置主题） */
+.editor .editor-area .cm-editor {
+  outline: none;
+}
+.editor .editor-area .cm-scroller {
+  font-family: inherit;
+  line-height: inherit;
+  overflow: visible;
+}
+.editor .editor-area .cm-content {
+  min-height: 46vh;
+  padding: 0;
+  /* 用 em 写死成像素行高：标题字大一号也还是一格，后面的字不会错开横线 */
+  line-height: 1.95em;
+  caret-color: var(--star);
+  background:
+    /* 很淡的横格，像信纸。每行行高 1.95em，字身底边约在 1.475em 处；
+       横线画在 1.65em，正好托在字下面，而不是顶着上一行 */
+    repeating-linear-gradient(180deg, transparent 0, transparent calc(1.95em - 1px), var(--line) calc(1.95em - 1px), var(--line) 1.95em) 0 -0.3em / 100% 1.95em;
+}
+.editor .editor-area .cm-line {
+  padding: 0;
+}
+.editor .editor-area .cm-placeholder {
+  color: var(--ink-3);
+}
+
+/* 所见即所得：符号藏起来后的效果，和阅读时的 .prose 保持一致 */
+.md-mark {
+  color: var(--ink-3);
+}
+.md-strong {
+  font-weight: 600;
+}
+.md-em {
+  font-style: italic;
+}
+.md-strike,
+.md-done {
+  text-decoration: line-through;
+  color: var(--ink-3);
+}
+.md-code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  padding: 1px 4px;
+  border-radius: 6px;
+  background: var(--row-hover);
+}
+.md-link {
+  color: var(--tide);
+  border-bottom: 1px solid color-mix(in srgb, var(--tide) 40%, transparent);
+}
+.editor .editor-area .md-h {
+  font-weight: 500;
+}
+.editor .editor-area .md-h1 {
+  font-size: 1.45em;
+}
+.editor .editor-area .md-h2 {
+  font-size: 1.25em;
+}
+.editor .editor-area .md-h3 {
+  font-size: 1.1em;
+}
+.editor .editor-area .md-quote {
+  padding-left: 18px;
+  border-left: 2px solid var(--star);
+  color: var(--ink-2);
+}
+.editor .editor-area .md-codeblock {
+  padding-left: 14px;
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--row);
+}
+.editor .editor-area .md-hr {
+  background: linear-gradient(90deg, transparent, var(--ink-3), transparent) center calc(50% - 0.3em) / 40% 1px no-repeat;
+}
+.md-bullet {
+  color: var(--star);
+}
+.md-check {
+  margin: 0 0.45em 0 0;
+  vertical-align: -0.12em;
+  accent-color: var(--star);
+  cursor: pointer;
+}
+.md-img {
+  /* 和光标占位放在同一行里，不另起行框，行高才好算 */
+  display: inline-block;
+  width: 100%;
+  vertical-align: top;
+}
+.md-img img {
+  display: block;
+  max-width: 100%;
+  max-height: 520px;
+  margin-top: 6px;
+  border-radius: var(--r-row);
+  object-fit: contain;
+}
+
+.composer-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px calc(-1 * clamp(20px, 5vw, 64px)) -28px;
+  padding: 14px clamp(20px, 5vw, 64px) 18px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 26px 26px;
+  background: linear-gradient(180deg, transparent, var(--paper) 30%);
+  font-size: var(--fs-sm);
+}
+.save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.save-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  transition: background var(--dur-2), box-shadow var(--dur-2);
+}
+.save--dirty .save-dot,
+.save--saving .save-dot {
+  background: var(--star);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.save--saved .save-dot {
+  background: var(--tide);
+  box-shadow: 0 0 8px var(--tide);
+}
+.save--error,
+.save--conflict {
+  color: var(--rouge);
+}
+.save--error .save-dot,
+.save--conflict .save-dot {
+  background: var(--rouge);
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.conflict {
+  margin: -16px 0 20px;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--rouge-soft);
+  border: 1px solid color-mix(in srgb, var(--rouge) 30%, transparent);
+  font-size: var(--fs-sm);
+}
+.conflict-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* 封存阅读 */
+.reader {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.reader .paper {
+  position: relative;
+}
+.reader-head {
+  margin-bottom: 22px;
+  padding-right: 96px;
+}
+.reader-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: var(--fs-2xl);
+}
+.reader-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+.reader-empty {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+}
+
+/* 封印：一枚胭脂色的方章 */
+.seal {
+  position: absolute;
+  top: 30px;
+  right: 34px;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--rouge);
+  border-radius: 6px;
+  color: var(--rouge);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.15;
+  transform: rotate(-9deg);
+  opacity: 0.82;
+  mix-blend-mode: normal;
+  animation: stamp 700ms var(--ease-out) 250ms both;
+}
+.seal span {
+  writing-mode: vertical-rl;
+  font-size: 21px;
+  letter-spacing: 0.08em;
+}
+@keyframes stamp {
+  from {
+    transform: rotate(-9deg) scale(1.6);
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  to {
+    transform: rotate(-9deg) scale(1);
+    opacity: 0.82;
+  }
+}
+
+@media (min-width: 961px) and (max-width: 1679px) {
+  .diary-desk > .diary-side {
+    position: static;
+  }
+}
+@media (min-width: 1680px) {
+  /* 书桌不必铺满整屏：收在 1960 以内，标题与三栏左边对齐 */
+  .page.diary {
+    max-width: 1960px;
+  }
+  .diary-desk {
+    grid-template-columns: 330px minmax(0, 1fr) 320px;
+    grid-template-areas: 'side paper margin';
+    grid-template-rows: auto;
+    gap: 44px;
+  }
+  .diary-desk > .diary-margin {
+    position: sticky;
+    top: 56px;
+  }
+  .diary-desk .composer {
+    min-height: calc(100vh - 230px);
+  }
+  .paper {
+    padding: 56px 72px 32px;
+  }
+  .composer-foot {
+    margin: 24px -72px -32px;
+    padding: 16px 72px 20px;
+  }
+  .composer-title {
+    font-size: 40px;
+  }
+  .editor-area,
+  .prose {
+    font-size: 18.5px;
+  }
+  .editor-area.kai,
+  .prose.kai {
+    font-size: 19.5px;
+  }
+}
+@media (max-width: 960px) {
+  .diary-body {
+    grid-template-columns: 1fr;
+  }
+  .diary-desk {
+    grid-template-areas: 'paper' 'margin' 'side';
+    grid-template-rows: auto;
+  }
+  .diary-side {
+    position: static;
+    order: 2;
+  }
+  .paper {
+    padding: 28px 18px 22px;
+  }
+  .composer-foot {
+    margin: 16px -18px -22px;
+    padding: 12px 18px 14px;
+    flex-wrap: wrap;
+  }
+}
+
+.composer-title:focus-visible,
+.editor-area .cm-content:focus-visible {
+  box-shadow: none;
+}
+
+/* 问问自己：左栏的灵感题 */
+.muse-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip--xs {
+  height: 24px;
+  padding: 0 10px;
+}
+.muse-card {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 7.2em;
+  margin: 18px 0 16px;
+  padding: 6px 0 6px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--star) 55%, transparent);
+  overflow: hidden;
+}
+.muse-q {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--fs-lg);
+  line-height: 1.75;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.muse-from {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  color: var(--star);
+}
+.muse-count {
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+.muse-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.muse-spin {
+  display: inline-flex;
+}
