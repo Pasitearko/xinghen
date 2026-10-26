@@ -141,4 +141,4 @@ pnpm test       # 导入与备份的测试
 - 动效参考了 [React Bits](https://github.com/DavidHDev/react-bits)（MIT）和 [starc007/ui-components](https://github.com/starc007/ui-components) 的思路：滑动选项卡、数字滚动、弹性勾选、共享元素展开、聚光灯悬停等，均按飞星的风格重写。
 - 西文与数字用 [Source Serif 4](https://github.com/adobe-fonts/source-serif)（SIL OFL 1.1，许可见 `web/src/styles/fonts/`），中文用系统里的思源宋体（Noto Serif CJK），两者是同一家族的姊妹字体。
 - 图标来自 [Lucide](https://lucide.dev)（ISC），动画库是 [Motion](https://motion.dev)（MIT），日记编辑器基于 [CodeMirror 6](https://codemirror.net)（MIT）。
-- `web/wallpapers/` 里的壁纸沿用自 Windows 版，仅供个人使用，版权归原作者所有，请不要再分发。
+- `web/wallpapers/` 里的壁纸沿用自 Windows 版，收集自网络，版权归原作者所有，仅作个人非商业使用。如果其中有你的作品且不希望出现在这里，请发邮件到 jiuliyearli@gmail.com 或提 Issue，确认后会尽快删除。
