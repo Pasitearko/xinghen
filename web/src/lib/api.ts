@@ -153,6 +153,10 @@ export interface NewsItem {
   id: number
   brand: string
   company: Company
+  /** 同一事件可关联多家；相关栏目引用相同的 event_id。 */
+  companies: Company[]
+  event_id: string
+  event_kind: 'model-release' | 'model-upgrade' | 'product-update' | 'website-news'
   source_key: string
   source_name: string
   category: NewsCategory
@@ -163,8 +167,9 @@ export interface NewsItem {
   fetched_at: string
   published_day: string
   dated: boolean
-  /** 这件事有几条报道（同一模型或标题用词大半相同的归成一条） */
+  /** 去重后这件事有多少个原文链接。 */
   reports: number
+  links: { title: string; url: string; source_name: string }[]
 }
 
 export interface NewsFeed {

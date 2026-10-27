@@ -92,18 +92,18 @@ cd 飞星所在的目录
 
 ## 每日焦点
 
-首页的资讯只追三家：**Anthropic、OpenAI、DeepSeek**（以及 Claude、ChatGPT、GPT、Sora、Codex、DeepSeek V/R 系列等旗下模型和产品），三家各占一列，不混排。
+首页只追 **Anthropic、OpenAI、DeepSeek** 的模型发布、模型升级，**Codex、Claude、DeepSeek** 的产品与版本动态，以及三家官网原文动态。三家各占一列；联合事件可同时关联多家，相关栏目引用同一个事件。
 
 - 只显示**最近 24 小时**发布的内容，每 3 小时自动更新一次（开机时如果离上次更新超过 3 小时也会更新）；超过 36 小时的条目直接删除，不留历史
-- 官方来源整条收下；媒体、社区和聚合来源只留标题里提到这三家的，标题里最先出现哪家就归哪家
-- 同一件事的报道合成一条：提到同一个模型（如 GPT-6.1 Terra、Claude Opus 5.5、DeepSeek V4.1）的算一件，否则看标题用词是否大半相同；有官方原文时显示官方原文，并标出有几条报道
+- 官网原文动态保留；媒体、社区和聚合只收模型发布/升级及指定产品与版本动态，排除融资、人物访谈、评测、教程和传闻。旧缓存也按新规则过滤
+- 同一事件合并多条报道，优先展示官方原文，可展开查看相关报道；同一模型的首发、后续升级和不同版本分别判断，不因模型名相同就合并。更新日志的不同锚点分别保留，Codex 订阅和 GitHub 的同一版本合并
 - 每列按热度排：报道越多越靠前，官方发布再加一档，随最新一条报道的时间慢慢降温；每列最多 12 条
 - 只写了日期没写时刻的官方文章（OpenAI 的 RSS 就是这样），按本机第一次看到的时间算，不会因为被当成当天 0 点而漏掉
 - 在「设置 → 资讯来源」里可以单独开关每个来源
 
 | 分类 | 来源 |
 | --- | --- |
-| 官方 | OpenAI News、Anthropic News、Claude Code 版本发布、DeepSeek 更新日志、Hugging Face 上 deepseek-ai 和 openai 发布的新模型 |
+| 官方 | OpenAI News 与 API 日志、Codex 官方更新与 GitHub Releases、Anthropic News、Claude 产品日志与官网文章、Claude Platform RSS、Claude Code Releases、DeepSeek 官网与 API 日志、Hugging Face 上 deepseek-ai 和 openai 发布的新模型 |
 | 媒体 | 量子位、雷峰网、爱范儿、IT之家、cnBeta、InfoQ 中文、The Verge、TechCrunch、The Decoder |
 | 社区 | Hacker News（80 分以上）、Simon Willison |
 | 聚合 | Google 新闻按公司名搜索最近一天的报道（三个搜索，分别对应三家） |

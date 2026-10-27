@@ -78,16 +78,20 @@ function Clock() {
 }
 
 const COMPANY: Record<Company, { name: string; sub: string }> = {
-  anthropic: { name: 'Anthropic', sub: 'Claude · Claude Code' },
-  openai: { name: 'OpenAI', sub: 'ChatGPT · GPT · Sora · Codex' },
-  deepseek: { name: 'DeepSeek', sub: '深度求索 · V 系列 · R 系列' },
+  anthropic: { name: 'Anthropic', sub: '模型 · Claude · 官网动态' },
+  openai: { name: 'OpenAI', sub: '模型 · Codex · 官网动态' },
+  deepseek: { name: 'DeepSeek', sub: '模型 · 产品版本 · 官网动态' },
 }
 
 /** 官方写「官方」；Google 新闻的条目显示原始媒体名（解析时放在摘要里） */
 function sourceLabel(n: NewsItem) {
-  if (n.category === 'official') return n.source_key === 'claude-code' ? 'Claude Code 发布' : '官方'
+  if (n.category === 'official') return n.source_name
   if (n.category === 'aggregate') return n.summary.replace(/^来自/, '') || 'Google 新闻'
   return n.source_name
+}
+
+const EVENT_LABEL: Record<NewsItem['event_kind'], string> = {
+  'model-release': '模型发布', 'model-upgrade': '模型升级', 'product-update': '产品与版本', 'website-news': '官网动态',
 }
 
 function NewsColumn({ company, items, ready, index }: { company: Company; items: NewsItem[]; ready: boolean; index: number }) {
@@ -104,19 +108,29 @@ function NewsColumn({ company, items, ready, index }: { company: Company; items:
       </header>
       <ul className="news-list">
         {!ready && Array.from({ length: 5 }, (_, i) => <li key={i} className="skeleton news-skel" />)}
-        {ready && !items.length && <li className="news-none">过去 24 小时没有 {c.name} 的新消息。</li>}
+        {ready && !items.length && <li className="news-none">过去 24 小时没有 {c.name} 的模型、产品版本或官网新动态。</li>}
         {items.map((n, i) => (
-          <motion.li key={n.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + stagger(i, 0.04, 0.5), duration: 0.5, ease: EASE_OUT }}>
+          <motion.li key={n.event_id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + stagger(i, 0.04, 0.5), duration: 0.5, ease: EASE_OUT }}>
             <a className="news-item" href={n.url} target="_blank" rel="noreferrer noopener">
               <span className="news-meta">
                 <span className={`news-src news-src--${n.category}`}>{sourceLabel(n)}</span>
                 <span>{timeAgo(n.published_at || n.fetched_at)}</span>
                 {n.reports > 1 && <span className="news-heat">{n.reports} 条报道</span>}
               </span>
+              <span className="news-tags">
+                <span>{EVENT_LABEL[n.event_kind]}</span>
+                {n.companies.length > 1 && <span>关联 {n.companies.map((key) => COMPANY[key].name).join(' · ')}</span>}
+              </span>
               <span className="news-item-title">{n.title}</span>
               {n.category === 'official' && n.summary && <span className="news-sum">{n.summary}</span>}
               <ArrowUpRight size={14} className="news-go" aria-hidden />
             </a>
+            {n.links.length > 1 && (
+              <details className="news-reports">
+                <summary>查看 {n.links.length} 条相关报道</summary>
+                <ul>{n.links.map((link) => <li key={link.url}><a href={link.url} target="_blank" rel="noreferrer noopener">{link.source_name}：{link.title}</a></li>)}</ul>
+              </details>
+            )}
           </motion.li>
         ))}
       </ul>

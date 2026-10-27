@@ -148,7 +148,7 @@ function NewsSection() {
   return (
     <section className="set-sec">
       <h3 className="set-title">资讯来源</h3>
-      <p className="set-hint">每日焦点只追 Anthropic、OpenAI、DeepSeek 三家：官方来源全收，其余来源只留标题里提到它们的。同一件事的多条报道合成一条，报道越多、越新的排得越前，有官方原文时显示官方原文。只显示最近 24 小时，旧消息不留存，开机后每 3 小时更新一次。</p>
+      <p className="set-hint">只收 OpenAI、Anthropic、DeepSeek 的模型发布与升级，Codex、Claude、DeepSeek 的产品与版本动态，以及三家官网动态。媒体评测、教程、传闻和融资等杂讯不收。同一事件合并报道，优先展示官方原文，可同时关联多家并在对应栏目查看。只显示最近 24 小时，开机后每 3 小时更新一次。</p>
       {groups.map((g) => (
         <div key={g.key} className="src-group">
           <p className="src-cat">{g.label}</p>

@@ -290,10 +290,29 @@
 }
 .news-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   font-size: 11.5px;
   color: var(--ink-3);
 }
+.news-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 5px;
+  color: var(--ink-3);
+  font-size: 11px;
+}
+.news-reports {
+  margin: -4px 0 12px;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.news-reports summary { cursor: pointer; }
+.news-reports ul { list-style: none; padding: 6px 0 0; }
+.news-reports li + li { margin-top: 6px; }
+.news-reports a { color: var(--ink-2); text-decoration: none; }
+.news-reports a:hover { color: var(--accent); }
 /* 报道多的是今天的大事，用这一家的颜色点一下 */
 .news-heat {
   margin-left: auto;
