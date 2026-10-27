@@ -217,16 +217,10 @@
   left: calc(100% + 18px);
   bottom: -6px;
   width: 290px;
-  padding: 16px 14px 12px;
+  padding: 8px;
   border-radius: 18px;
   background: var(--glass-strong);
   transform-origin: left bottom;
-}
-.sig-line {
-  padding: 0 8px 10px;
-  font-family: var(--serif);
-  font-size: var(--fs-sm);
-  color: var(--ink-2);
 }
 .contact {
   display: flex;

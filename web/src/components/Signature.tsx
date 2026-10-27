@@ -87,7 +87,6 @@ export function Signature() {
             exit={{ opacity: 0, x: -6, scale: 0.98, transition: { duration: 0.16 } }}
             transition={SPRING_PANEL}
           >
-            <p className="sig-line">飞星由 Pasitearko 写成，在本机安静地运行。</p>
             <ContactLinks />
           </motion.div>
         )}
