@@ -204,9 +204,17 @@ p {
 .t-head .page-sub,
 .home-hero .home-date,
 .home-hero .home-tag,
-.news-board-head .news-board-meta {
+.news-board-head .news-board-meta,
+.stats .stat dt,
+.review .review-since {
   color: var(--ink);
   font-weight: 500;
+}
+/* 页头的栏目切换也直接压在壁纸上，原来的底色几乎透明，换成毛玻璃垫底 */
+.page-head .tabs,
+.t-head .tabs {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.25);
 }
 
 .page-head {

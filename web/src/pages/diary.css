@@ -289,6 +289,52 @@
   color: var(--ink-3);
 }
 
+/* 打字反馈：刚落下的字先透一点金光，半秒内沉成墨色（不写结束帧，沉回去的是各自原本的颜色） */
+.ink-settle {
+  animation: ink-settle 520ms ease-out backwards;
+}
+@keyframes ink-settle {
+  from {
+    color: transparent;
+    text-shadow: 0 0 6px color-mix(in srgb, var(--star) 85%, transparent);
+  }
+  55% {
+    color: color-mix(in srgb, var(--star) 55%, var(--ink));
+    text-shadow: 0 0 3px color-mix(in srgb, var(--star) 40%, transparent);
+  }
+}
+/* 输入法组字中的拼音：不能改 DOM，用 Highlight 分三档画出同样的由亮到暗 */
+::highlight(ink-pinyin-1) {
+  color: transparent;
+  text-shadow: 0 0 6px color-mix(in srgb, var(--star) 85%, transparent);
+}
+::highlight(ink-pinyin-2) {
+  color: color-mix(in srgb, var(--star) 55%, var(--ink));
+  text-shadow: 0 0 3px color-mix(in srgb, var(--star) 40%, transparent);
+}
+::highlight(ink-pinyin-3) {
+  color: color-mix(in srgb, var(--star) 25%, var(--ink));
+}
+/* 光标处飘起的一粒星点 */
+.ink-dust {
+  position: absolute;
+  z-index: 3;
+  width: 3px;
+  height: 3px;
+  margin-left: -1px;
+  border-radius: 50%;
+  background: var(--star);
+  box-shadow: 0 0 6px var(--star);
+  pointer-events: none;
+  animation: ink-dust 800ms ease-out forwards;
+}
+@keyframes ink-dust {
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), -18px) scale(0.4);
+  }
+}
+
 /* 所见即所得：符号藏起来后的效果，和阅读时的 .prose 保持一致 */
 .md-mark {
   color: var(--ink-3);

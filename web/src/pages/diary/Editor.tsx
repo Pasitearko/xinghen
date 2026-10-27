@@ -9,6 +9,7 @@ import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'reac
 import { uploadImage } from '../../lib/api'
 import { toast } from '../../lib/store'
 import { livePreview } from './livePreview'
+import { typingFeedback } from './typingFeedback'
 
 type Action = { icon: typeof Bold; label: string; run: (sel: string) => { text: string; caret?: number }; line?: boolean }
 
@@ -112,6 +113,7 @@ export function Editor({
           // 只要 Markdown 本身（含 GFM 的待办、删除线），不带 HTML、代码高亮那一大套
           markdownLanguage,
           livePreview,
+          typingFeedback,
           EditorView.lineWrapping,
           placeholder('今天发生了什么，想到了什么……'),
           EditorView.contentAttributes.of({ spellcheck: 'false', 'aria-label': '正文' }),

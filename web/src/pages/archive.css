@@ -12,6 +12,11 @@
 .stat {
   padding: 4px 0;
 }
+/* 数字和说明直接落在壁纸上，垫一圈淡淡的光晕，浅色天空、云层上也能看清 */
+.stat,
+.review-since {
+  text-shadow: 0 0 2px var(--halo), 0 0 14px var(--halo);
+}
 .stat dd {
   margin: 0;
   font-family: var(--serif);
@@ -21,12 +26,12 @@
 }
 .stat dt {
   margin-top: 6px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--ink-3);
 }
 .review-since {
   margin-top: -10px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .review-grid {
   display: grid;
@@ -79,7 +84,7 @@
   justify-content: flex-end;
   gap: 4px;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .heat-key {
   width: 10px;
@@ -93,7 +98,7 @@
   translate: -50% calc(-100% - 10px);
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   white-space: nowrap;
   pointer-events: none;
   background: var(--glass-strong);
@@ -139,7 +144,7 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--ink-3);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 
 /* 日记列表 */
@@ -152,7 +157,7 @@
 }
 .a-count {
   margin: -8px 0 12px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .a-month {
   margin-bottom: 22px;
@@ -168,7 +173,7 @@
 }
 .a-month-title span {
   font-family: var(--sans);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .a-entries {
   list-style: none;
@@ -201,7 +206,7 @@
   font-weight: 400;
 }
 .a-entry-date small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--ink-3);
 }
 .a-entry-body {
@@ -224,7 +229,7 @@
 .a-entry-meta {
   display: flex;
   gap: 10px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   white-space: nowrap;
   padding-top: 4px;
 }
@@ -238,7 +243,7 @@ mark {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--ink-3);
 }
 
@@ -269,7 +274,7 @@ mark {
   display: flex;
   justify-content: space-between;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 
 /* 备份 */
@@ -320,7 +325,7 @@ mark {
 }
 .backup-tip {
   margin-top: 16px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   line-height: 1.8;
 }
 code {
@@ -348,7 +353,7 @@ code {
   flex: 1;
   min-width: 0;
   font-family: var(--mono);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -357,7 +362,7 @@ code {
   grid-template-columns: 80px 1fr;
   gap: 8px 12px;
   margin: 20px 0 0;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .paths dt {
   color: var(--ink-3);
@@ -401,10 +406,11 @@ code {
     line-height: 1;
   }
   .stat dt {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-md);
   }
   .review-since {
     margin-top: 6px;
+    font-size: var(--fs-md);
   }
   .review-grid {
     gap: 28px;
