@@ -211,7 +211,8 @@
   color: var(--star);
   transform: rotate(45deg) scale(1.2);
 }
-.sig-card {
+/* 带上 .glass 提高优先级：.glass 的 position: relative 要是赢了，卡片就会挤进星轨的排版，把上面的工具按钮顶走 */
+.sig-card.glass {
   position: absolute;
   left: calc(100% + 18px);
   bottom: -6px;
