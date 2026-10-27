@@ -198,24 +198,15 @@ p {
   padding: 44px 40px 120px;
 }
 
-/* 直接落在天空 / 壁纸上的字（不在毛玻璃面板里）：垫一圈和主题同色的柔光。
-   默认天空上这圈光和底色一样，看不出来；换成花哨或反差大的壁纸时，字下面就有一层稳定的底 */
-:root {
-  /* 由紧到松三圈：最里一圈贴着笔画描出轮廓，外面两圈铺出一小片底色 */
-  --sky-ink-shadow: 0 0 1px var(--halo), 0 0 4px var(--halo), 0 0 14px var(--halo), 0 0 34px color-mix(in srgb, var(--halo) 60%, transparent);
-}
-.page-head,
-.t-head,
-.home-hero,
-.news-board-head {
-  text-shadow: var(--sky-ink-shadow);
-}
-/* 小字本来用次一级的墨色，落在照片上太淡，直接用正文墨色（多一层类名，压过 .faint 和各页自己的颜色） */
+/* 直接落在天空 / 壁纸上的小字：本来是次一级的墨色加常规字重，落在照片上太淡。
+   改用正文墨色并加重一档（多一层类名，压过 .faint 和各页自己的样式） */
 .page-head .page-sub,
 .t-head .page-sub,
 .home-hero .home-date,
+.home-hero .home-tag,
 .news-board-head .news-board-meta {
   color: var(--ink);
+  font-weight: 500;
 }
 
 .page-head {
