@@ -111,6 +111,7 @@ function NewsColumn({ company, items, ready, index }: { company: Company; items:
               <span className="news-meta">
                 <span className={`news-src news-src--${n.category}`}>{sourceLabel(n)}</span>
                 <span>{timeAgo(n.published_at || n.fetched_at)}</span>
+                {n.reports > 1 && <span className="news-heat">{n.reports} 条报道</span>}
               </span>
               <span className="news-item-title">{n.title}</span>
               {n.category === 'official' && n.summary && <span className="news-sum">{n.summary}</span>}

@@ -294,6 +294,12 @@
   font-size: 11.5px;
   color: var(--ink-3);
 }
+/* 报道多的是今天的大事，用这一家的颜色点一下 */
+.news-heat {
+  margin-left: auto;
+  color: var(--accent);
+  white-space: nowrap;
+}
 .news-src {
   overflow: hidden;
   text-overflow: ellipsis;

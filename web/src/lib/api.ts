@@ -163,6 +163,8 @@ export interface NewsItem {
   fetched_at: string
   published_day: string
   dated: boolean
+  /** 这件事有几条报道（同一模型或标题用词大半相同的归成一条） */
+  reports: number
 }
 
 export interface NewsFeed {

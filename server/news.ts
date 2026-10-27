@@ -5,7 +5,7 @@ import { all, get, kvGet, kvSet, run, tx } from './db.ts'
 import { dayKey, nowIso, todayKey } from './time.ts'
 
 export type Category = 'official' | 'media' | 'community' | 'aggregate'
-type Kind = 'rss' | 'github' | 'anthropic' | 'deepseek' | 'hn' | 'gnews'
+type Kind = 'rss' | 'github' | 'anthropic' | 'deepseek' | 'hn' | 'gnews' | 'hf'
 
 export interface Source {
   key: string
@@ -27,6 +27,9 @@ export const SOURCES: Source[] = [
   { key: 'anthropic', brand: 'Anthropic', name: 'Anthropic News', url: 'https://www.anthropic.com/news', kind: 'anthropic', category: 'official', company: 'anthropic', home: 'https://www.anthropic.com/news' },
   { key: 'claude-code', brand: 'Anthropic', name: 'Claude Code 版本', url: 'https://api.github.com/repos/anthropics/claude-code/releases?per_page=10', kind: 'github', category: 'official', company: 'anthropic', home: 'https://github.com/anthropics/claude-code/releases' },
   { key: 'deepseek', brand: 'DeepSeek', name: 'DeepSeek 更新日志', url: 'https://api-docs.deepseek.com/updates/', kind: 'deepseek', category: 'official', company: 'deepseek', home: 'https://api-docs.deepseek.com/updates/' },
+  // 开源权重的新模型往往先出现在 Hugging Face 上，比任何新闻都早
+  { key: 'hf-deepseek', brand: 'Hugging Face', name: 'Hugging Face · deepseek-ai', url: hf('deepseek-ai'), kind: 'hf', category: 'official', company: 'deepseek', home: 'https://huggingface.co/deepseek-ai' },
+  { key: 'hf-openai', brand: 'Hugging Face', name: 'Hugging Face · openai', url: hf('openai'), kind: 'hf', category: 'official', company: 'openai', home: 'https://huggingface.co/openai' },
   // 媒体与社区：只留下标题里提到这三家的
   { key: 'qbitai', brand: '量子位', name: '量子位', url: 'https://www.qbitai.com/feed', kind: 'rss', category: 'media', home: 'https://www.qbitai.com' },
   { key: 'leiphone', brand: '雷峰网', name: '雷峰网', url: 'https://www.leiphone.com/feed', kind: 'rss', category: 'media', home: 'https://www.leiphone.com' },
@@ -44,6 +47,10 @@ export const SOURCES: Source[] = [
   { key: 'gnews-openai', brand: 'Google 新闻', name: 'Google 新闻 · OpenAI', url: gnews('OpenAI OR ChatGPT'), kind: 'gnews', category: 'aggregate', home: 'https://news.google.com' },
   { key: 'gnews-deepseek', brand: 'Google 新闻', name: 'Google 新闻 · DeepSeek', url: gnews('DeepSeek'), kind: 'gnews', category: 'aggregate', home: 'https://news.google.com' },
 ]
+
+function hf(author: string) {
+  return `https://huggingface.co/api/models?author=${author}&sort=createdAt&direction=-1&limit=20`
+}
 
 function gnews(q: string) {
   return `https://news.google.com/rss/search?q=${encodeURIComponent(`${q} when:1d`)}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans`
@@ -76,6 +83,8 @@ interface Raw {
   url: string
   summary: string
   published: string | null
+  /** 来源只给了日期（OpenAI 的 RSS 一律写成当天 00:00、Anthropic 和 DeepSeek 页面上只有日期），没有具体时刻 */
+  dateOnly?: boolean
 }
 
 // ---------- 解析 ----------
@@ -125,7 +134,7 @@ export function parseFeed(xml: string): Raw[] {
       summary: stripHtml(tag(b, ['description', 'summary', 'content:encoded', 'content'])).slice(0, 400),
       published: parseDate(tag(b, ['pubDate', 'published', 'updated', 'dc:date'])),
     }
-  })
+  }).map((r) => ({ ...r, dateOnly: !!r.published?.endsWith('T00:00:00.000Z') }))
 }
 
 /** Google 新闻：标题形如「xxx - 新浪财经」，把来源拆出来放进摘要位，链接是 Google 的跳转页。 */
@@ -202,7 +211,8 @@ export function parseAnthropic(html: string): Raw[] {
       title: title.slice(0, 300),
       url: `https://www.anthropic.com/news/${a.slug}`,
       summary: desc.slice(0, 300),
-      published: new Date(Date.UTC(Number(dm[3]), MONTHS[dm[1].slice(0, 3).toLowerCase()], Number(dm[2]), 12)).toISOString(),
+      published: new Date(Date.UTC(Number(dm[3]), MONTHS[dm[1].slice(0, 3).toLowerCase()], Number(dm[2]))).toISOString(),
+      dateOnly: true,
     })
   })
   return out
@@ -219,9 +229,20 @@ function parseDeepseek(html: string): Raw[] {
       title,
       url: 'https://api-docs.deepseek.com/updates/',
       summary: plain.slice(m.index! + m[0].length - m[2].length + title.length, end).trim().slice(0, 400),
-      published: new Date(`${m[1]}T12:00:00Z`).toISOString(),
+      published: new Date(`${m[1]}T00:00:00Z`).toISOString(),
+      dateOnly: true,
     }]
   })
+}
+
+function parseHf(json: string, brand: string): Raw[] {
+  const list = JSON.parse(json) as { id: string; createdAt?: string; pipeline_tag?: string }[]
+  return list.map((m) => ({
+    title: `${brand} 在 Hugging Face 发布新模型 ${m.id.split('/').pop()}`,
+    url: `https://huggingface.co/${m.id}`,
+    summary: m.pipeline_tag ? `类型：${m.pipeline_tag}` : '',
+    published: m.createdAt ? new Date(m.createdAt).toISOString() : null,
+  }))
 }
 
 // ---------- 抓取与入库 ----------
@@ -274,7 +295,9 @@ async function refreshSource(src: Source) {
               ? parseAnthropic(text)
               : src.kind === 'hn'
                 ? parseHn(text)
-                : parseDeepseek(text)
+                : src.kind === 'hf'
+                  ? parseHf(text, src.company === 'openai' ? 'OpenAI' : 'DeepSeek')
+                  : parseDeepseek(text)
     // 官方来源整条收下；其他来源只留标题里提到三家之一的
     items = items.filter((r) => r.title && (src.company || classify(r.title)))
     if (!items.length && src.kind !== 'rss') throw new Error('页面结构可能变了：没解析出任何条目')
@@ -283,6 +306,13 @@ async function refreshSource(src: Source) {
     const firstRun = !sourceState(src.key)?.last_success_at
     const limit = Date.now() + 2 * 3600_000
     for (const r of items) if (r.published && Date.parse(r.published) > limit) r.published = fetched
+    // 只有日期的条目不能当成那天的 0 点：0 点到现在早就过了 24 小时，当天的发布会被误当旧闻丢掉
+    // （GPT-6.1 Terra 就是这样漏掉的）。改按本机第一次看到它的时刻算，但不晚于那一天在美西结束的时刻
+    for (const r of items) {
+      if (!r.dateOnly || !r.published) continue
+      const day = Date.parse(r.published)
+      r.published = new Date(Math.max(day, Math.min(Date.now(), day + 31 * 3600_000))).toISOString()
+    }
     // 只收最新的：发布超过 FRESH_HOURS 的不入库；没有发布时间的只在「后来新出现」时才算新
     const fresh = Date.now() - FRESH_HOURS * 3600_000
     const recent = items.filter((r) => (r.published ? Date.parse(r.published) >= fresh : !firstRun))
@@ -290,8 +320,16 @@ async function refreshSource(src: Source) {
     tx(() => {
       for (const r of recent.slice(0, 40)) {
         const res = run(
+          // 同一个链接已经被别的来源收过（比如 Hacker News 直接转贴官方原文）：官方来源接手这一条，
+          // 换成官方的标题和摘要，发布时间取两者中更早的；非官方来源撞上就跳过
           `INSERT INTO news_items(dedup_key, brand, source_key, title, summary, url, published_at, fetched_at, published_day)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(dedup_key) DO NOTHING`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(dedup_key) DO ${
+             src.category === 'official'
+               ? `UPDATE SET brand = excluded.brand, source_key = excluded.source_key, title = excluded.title, summary = excluded.summary,
+                    published_at = MIN(COALESCE(news_items.published_at, excluded.published_at), COALESCE(excluded.published_at, news_items.published_at))
+                  WHERE news_items.source_key <> excluded.source_key`
+               : 'NOTHING'
+           }`,
           dedupKey(src, r),
           src.brand,
           src.key,
@@ -407,13 +445,53 @@ interface ItemRow {
 
 const META = new Map(SOURCES.map((s) => [s.key, s]))
 
-function serialize(r: ItemRow, company: Company) {
+function serialize(r: ItemRow, company: Company, reports: number) {
   const s = META.get(r.source_key)
-  return { ...r, company, category: s?.category || 'media', source_name: s?.name || r.source_key, dated: !!r.published_at }
+  return { ...r, company, category: s?.category || 'media', source_name: s?.name || r.source_key, dated: !!r.published_at, reports }
 }
 
-/** 同一件事常被几家同时报道：去掉标点空白后标题前 18 个字相同就算重复，留最早抓到的那条（官方优先） */
-const sameStory = (t: string) => t.toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, '').slice(0, 18)
+/**
+ * 标题的「词」：中文取相邻两字，英文取单词；先去掉公司名和套话，免得每条都因为都写了 OpenAI 而相似。
+ * 没提到具体模型的报道靠它判断是不是同一件事。
+ */
+const NOISE = /openai|chatgpt|anthropic|claude|deepseek|深度求索|刚刚|重磅|突发|最新|消息|报道|据悉|宣布|官宣|google新闻/gi
+const EN_STOP = new Set(['the', 'and', 'for', 'with', 'its', 'new', 'how', 'what', 'why', 'that', 'this', 'from', 'are', 'has', 'have', 'will', 'into', 'about', 'after', 'over', 'says', 'said'])
+function terms(title: string) {
+  const t = title.toLowerCase().replace(NOISE, ' ')
+  const out = new Set<string>()
+  for (const w of t.match(/[a-z][a-z0-9.-]{2,}/g) || []) if (!EN_STOP.has(w)) out.add(w)
+  for (const run of t.match(/[\p{Script=Han}]+/gu) || []) for (let i = 0; i + 1 < run.length; i++) out.add(run.slice(i, i + 2))
+  return out
+}
+/** 新标题里有一半以上的词，已经在这组报道里出现过，就算同一件事 */
+function sameStory(story: Set<string>, title: Set<string>) {
+  if (title.size < 4) return false
+  let hit = 0
+  for (const w of title) if (story.has(w)) hit++
+  return hit / title.size >= 0.5
+}
+
+// 标题里提到的具体模型：各家媒体标题写法五花八门，但模型名是一样的，按它把同一件事归到一起
+const STOP = new Set(['The', 'And', 'For', 'With', 'Model', 'Models', 'API', 'Now', 'Is', 'In', 'On', 'To', 'Helps', 'Takes', 'Launch', 'Launches'])
+const MODEL_PATTERNS: RegExp[] = [
+  /\b[Gg][Pp][Tt][-‑\s]?(\d+(?:\.\d+)?)(?:[-\s]([A-Z][a-z]{2,9}|mini|nano|pro|oss|turbo))?/,
+  /\b(?:[Cc]laude[-\s]?)?([Oo]pus|[Ss]onnet|[Hh]aiku|[Ff]able)[-\s]?(\d+(?:\.\d+)?)/,
+  /\b[Dd]eep[Ss]eek[-\s]?([VvRr]\d+(?:\.\d+)?)(?:[-\s](Flash|Pro|Lite|Vision|Coder|Prover|Exp))?/i,
+  /\b[Ss]ora[-\s]?(\d+)/,
+]
+function modelKey(title: string): string | null {
+  let at = Infinity
+  let key: string | null = null
+  for (const [family, re] of MODEL_PATTERNS.entries()) {
+    const m = re.exec(title)
+    if (!m || m.index >= at) continue
+    at = m.index
+    key = `${family}|${m.slice(1).filter((x) => x && !STOP.has(x)).join(' ').toLowerCase()}`
+  }
+  return key
+}
+/** 官方文章里只有「发布 / 推出」这类才和媒体报道算同一件事，客户案例之类的单独成条 */
+const LAUNCH = /introduc|launch|releas|announc|now available|发布|推出|上线|开源|上新/i
 
 const PER_COMPANY = 12
 const PER_SOURCE = 8
@@ -426,25 +504,72 @@ export function feed() {
     'SELECT * FROM news_items WHERE COALESCE(published_at, fetched_at) >= ? ORDER BY COALESCE(published_at, fetched_at) DESC, id DESC LIMIT 600',
     since,
   ).filter((r) => enabled.has(r.source_key))
-  // 官方的排在前面参与去重，这样同一条消息留下的是官方原文
-  rows.sort((x, y) => Number(META.get(y.source_key)?.category === 'official') - Number(META.get(x.source_key)?.category === 'official'))
-  const seen = new Set<string>()
-  const per = new Map<string, number>()
-  const groups: Record<Company, ReturnType<typeof serialize>[]> = { anthropic: [], openai: [], deepseek: [] }
+  const time = (x: ItemRow) => x.published_at || x.fetched_at
+  const official = (x: ItemRow) => META.get(x.source_key)?.category === 'official'
+
+  // 1. 把同一件事的报道归成一组：提到同一个模型的算一组（官方的客户案例这类除外），否则看标题用词是否大半相同
+  type Cluster = { company: Company; items: ItemRow[]; terms: Set<string> }
+  const byModel = new Map<string, Cluster>()
+  const loose: Cluster[] = []
   for (const r of rows) {
     const company = META.get(r.source_key)?.company || classify(r.title)
     if (!company) continue
-    const story = sameStory(r.title)
-    if (seen.has(story)) continue
-    const k = `${company}:${r.source_key}`
+    const model = official(r) && !LAUNCH.test(r.title) ? null : modelKey(r.title)
+    const words = terms(r.title)
+    let c = model ? byModel.get(`${company}:${model}`) : loose.find((x) => x.company === company && sameStory(x.terms, words))
+    if (!c) {
+      c = { company, items: [], terms: new Set() }
+      if (model) byModel.set(`${company}:${model}`, c)
+      else loose.push(c)
+    }
+    c.items.push(r)
+    for (const w of words) c.terms.add(w)
+  }
+  // 第二遍：头一遍按顺序归组，同一件事可能被拆成几组；两组用词大半重合就并成一组，直到并不动为止
+  const overlap = (a: Set<string>, b: Set<string>) => {
+    const [small, big] = a.size <= b.size ? [a, b] : [b, a]
+    if (small.size < 6) return 0
+    let hit = 0
+    for (const w of small) if (big.has(w)) hit++
+    return hit / small.size
+  }
+  for (let merged = true; merged; ) {
+    merged = false
+    for (let i = 0; i < loose.length && !merged; i++) {
+      for (let j = i + 1; j < loose.length; j++) {
+        if (loose[i].company !== loose[j].company || overlap(loose[i].terms, loose[j].terms) < 0.45) continue
+        loose[i].items.push(...loose[j].items)
+        for (const w of loose[j].terms) loose[i].terms.add(w)
+        loose.splice(j, 1)
+        merged = true
+        break
+      }
+    }
+  }
+  const clusters = [...byModel.values(), ...loose]
+
+  // 2. 每组挑一条代表：有官方原文用官方，否则用最早报道的那条
+  //    热度：几家在报道（官方发布额外加分），再按最新一条报道的时间慢慢降温
+  const now = Date.now()
+  const ranked = clusters.map((c) => {
+    const byTime = [...c.items].sort((x, y) => time(x).localeCompare(time(y)))
+    const rep = byTime.find(official) || byTime[0]
+    const latest = Date.parse(time(byTime[byTime.length - 1]))
+    const boost = official(rep) ? (LAUNCH.test(rep.title) ? 10 : 2) : 0
+    const score = 8 * Math.log2(1 + c.items.length) + boost - (now - latest) / 3600_000 / 1.6
+    return { company: c.company, rep, reports: c.items.length, score }
+  })
+  ranked.sort((x, y) => y.score - x.score)
+
+  const per = new Map<string, number>()
+  const groups: Record<Company, ReturnType<typeof serialize>[]> = { anthropic: [], openai: [], deepseek: [] }
+  for (const { company, rep, reports } of ranked) {
+    const k = `${company}:${rep.source_key}`
     const n = (per.get(k) || 0) + 1
     if (n > PER_SOURCE || groups[company].length >= PER_COMPANY) continue
     per.set(k, n)
-    seen.add(story)
-    groups[company].push(serialize(r, company))
+    groups[company].push(serialize(rep, company, reports))
   }
-  const time = (x: ItemRow) => x.published_at || x.fetched_at
-  for (const c of COMPANIES) groups[c].sort((x, y) => time(y).localeCompare(time(x)))
   return {
     today,
     companies: COMPANIES.map((c) => ({ key: c, items: groups[c] })),
