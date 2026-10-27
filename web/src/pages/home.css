@@ -21,7 +21,14 @@
   letter-spacing: -0.015em;
   line-height: 0.86;
   color: var(--ink);
-  text-shadow: 0 0 60px color-mix(in srgb, var(--star) 16%, transparent);
+  text-shadow: var(--sky-ink-shadow), 0 0 60px color-mix(in srgb, var(--star) 16%, transparent);
+}
+/* 浅色模式下深色细线落在照片上最容易糊，笔画加粗一点 */
+:root[data-theme='dawn'] .home-clock {
+  font-weight: 280;
+}
+:root[data-theme='dawn'] .home-greet {
+  font-weight: 400;
 }
 .home-clock-colon {
   margin: 0 0.04em;
@@ -66,6 +73,7 @@
 .home-date {
   margin-top: 12px;
   color: var(--ink-2);
+  font-weight: 500;
   font-size: var(--fs-md);
   letter-spacing: 0.06em;
 }
