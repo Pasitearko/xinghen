@@ -263,6 +263,13 @@
   margin-left: 6px;
   color: var(--ink-3);
 }
+/* 滑块自带的最小宽度比这一格还宽，不放开的话会挤掉喇叭图标、伸出面板 */
+.vol input {
+  min-width: 0;
+}
+.vol svg {
+  flex: none;
+}
 @media (max-width: 480px) {
   .mini {
     width: calc(100vw - 24px);
