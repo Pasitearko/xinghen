@@ -10,6 +10,18 @@
   align-items: center;
   padding: 28px 0 22px;
 }
+/* 侧栏后面垫一层磨砂：左边实、右边渐渐化开，没有硬边，像星轨浮在一层薄雾上。
+   壁纸再亮、再花，字和图标都有稳定的底色可依 */
+.rail::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 -28px 0 0;
+  background: var(--rail-veil);
+  backdrop-filter: blur(16px) saturate(1.2);
+  mask-image: linear-gradient(90deg, #000 62%, transparent);
+  pointer-events: none;
+}
 
 .rail-brand {
   display: grid;
@@ -23,7 +35,7 @@
   font-weight: 500;
   letter-spacing: 0.32em;
   color: var(--ink);
-  text-shadow: 0 0 18px color-mix(in srgb, var(--star) 40%, transparent);
+  text-shadow: 0 0 2px var(--halo), 0 0 18px color-mix(in srgb, var(--star) 40%, transparent);
 }
 
 .rail-list {
@@ -43,8 +55,9 @@
   bottom: 40px;
   width: 1px;
   transform: translateX(-0.5px);
-  background: linear-gradient(180deg, transparent, var(--glass-edge-hi) 12%, var(--glass-edge-hi) 88%, transparent);
-  opacity: 0.6;
+  --rail-thread: color-mix(in srgb, var(--ink-3) 70%, transparent);
+  background: linear-gradient(180deg, transparent, var(--rail-thread) 12%, var(--rail-thread) 88%, transparent);
+  opacity: 0.7;
 }
 
 .rail-item {
@@ -55,7 +68,8 @@
   gap: 4px;
   width: 64px;
   padding: 4px 0;
-  color: var(--ink-3);
+  color: var(--ink-2);
+  text-shadow: 0 0 6px var(--halo), 0 0 2px var(--halo);
   transition: color var(--dur-2);
 }
 .rail-item:hover,
@@ -70,7 +84,7 @@
   height: 36px;
   border-radius: 50%;
   /* 遮住连线，让星像穿在线上 */
-  background: radial-gradient(closest-side, var(--sky-top) 55%, transparent 56%);
+  background: radial-gradient(closest-side, var(--rail-node) 55%, transparent 56%);
 }
 .rail-glow {
   position: absolute;
@@ -83,6 +97,7 @@
   width: 14px;
   height: 14px;
   fill: currentColor;
+  filter: drop-shadow(0 0 3px var(--halo));
   transition: transform var(--dur-3) var(--ease-out), fill var(--dur-2), filter var(--dur-2);
 }
 .rail-item:hover .rail-star {
@@ -109,7 +124,8 @@
   gap: 6px;
 }
 .rail-tool {
-  color: var(--ink-3);
+  color: var(--ink-2);
+  filter: drop-shadow(0 0 4px var(--halo));
 }
 
 /* 底部停靠栏（窄屏） */
@@ -180,8 +196,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  color: var(--ink-3);
-  opacity: 0.38;
+  color: var(--ink-2);
+  opacity: 0.5;
   transition: opacity var(--dur-2), color var(--dur-2), transform var(--dur-3) var(--ease-out);
 }
 .sig-star svg {
