@@ -1,4 +1,4 @@
-// 天幕：渐变夜空 + 静态星点（只在尺寸变化时重画）+ 极光纱 + 偶尔划过的飞星 + 可选的雪/雨。
+// 天幕：渐变夜空 + 静态星点（只在尺寸变化时重画）+ 极光纱 + 偶尔划过的流星 + 可选的雪/雨。
 // 性能取舍：星星画一次后只用 CSS 透明度闪烁；极光是纯 CSS 渐变块，只动 transform；
 // 只有选了雪/雨才会跑 rAF，且限 40fps、标签页隐藏时暂停。
 import { AnimatePresence, motion } from 'motion/react'
@@ -106,7 +106,7 @@ function Meteors({ enabled }: { enabled: boolean }) {
       ])
     }
     const onEvent = () => spawn(true)
-    addEventListener('feixing:meteor', onEvent)
+    addEventListener('xinghen:meteor', onEvent)
     let timer = 0
     const loop = () => {
       timer = window.setTimeout(() => {
@@ -116,7 +116,7 @@ function Meteors({ enabled }: { enabled: boolean }) {
     }
     loop()
     return () => {
-      removeEventListener('feixing:meteor', onEvent)
+      removeEventListener('xinghen:meteor', onEvent)
       clearTimeout(timer)
     }
   }, [enabled])

@@ -4,12 +4,12 @@ import { join } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
-const API = `http://127.0.0.1:${process.env.FEIXING_PORT || 8001}`
+const API = `http://127.0.0.1:${process.env.XINGHEN_PORT || 8001}`
 
 /** 构建后给文本资源生成 .br / .gz，本机服务直接返回预压缩版本。 */
 function precompress(): Plugin {
   return {
-    name: 'feixing-precompress',
+    name: 'xinghen-precompress',
     apply: 'build',
     closeBundle() {
       const walk = (dir: string): string[] =>

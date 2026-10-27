@@ -4,13 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
-    <title>飞星</title>
+    <title>星痕</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script>
+      // 改名前存在浏览器里的设置、草稿、当前曲目用的是 feixing.* 键名：第一次打开时搬到 xinghen.*。
+      // 放在这里是因为它比页面脚本先跑，读设置之前就已经搬好了。
+      ;(function () {
+        try {
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i)
+            if (!k || k.indexOf('feixing.') !== 0) continue
+            var to = 'xinghen.' + k.slice(8)
+            if (localStorage.getItem(to) === null) localStorage.setItem(to, localStorage.getItem(k))
+            localStorage.removeItem(k)
+          }
+        } catch (e) {}
+      })()
       // 首帧之前写好主题，避免先闪一下错误的底色
       ;(function () {
         try {
-          var p = JSON.parse(localStorage.getItem('feixing.prefs') || '{}')
+          var p = JSON.parse(localStorage.getItem('xinghen.prefs') || '{}')
           var t = p.theme
           if (t !== 'night' && t !== 'dawn') t = matchMedia('(prefers-color-scheme: light)').matches ? 'dawn' : 'night'
           document.documentElement.dataset.theme = t

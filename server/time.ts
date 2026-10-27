@@ -1,5 +1,5 @@
-// 「哪一天」按本机时区判定（FEIXING_TZ 可覆盖），跨过本地午夜后前一天的日记封存为只读。
-export const TZ = process.env.FEIXING_TZ || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Shanghai'
+// 「哪一天」按本机时区判定（XINGHEN_TZ 可覆盖），跨过本地午夜后前一天的日记封存为只读。
+export const TZ = process.env.XINGHEN_TZ || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Shanghai'
 
 const dayFmt = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' })
 const hourFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', hour12: false })

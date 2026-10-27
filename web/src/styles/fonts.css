@@ -3,7 +3,7 @@
    中文落到思源宋体，西文和数字落到这里，像同一套字。
    unicode-range 刻意避开 — ‘’“” … 这些标点，让中文里的引号、破折号、省略号仍用全角字形。 */
 @font-face {
-  font-family: 'Feixing Serif';
+  font-family: 'Xinghen Serif';
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;

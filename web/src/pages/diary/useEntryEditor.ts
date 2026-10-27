@@ -18,7 +18,7 @@ export interface Form {
 export type SaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error' | 'conflict'
 
 const EMPTY: Form = { title: '', content_md: '', weather: '', mood: '', tags: [] }
-const DRAFT_KEY = (identity: string) => `feixing.draft.${identity}`
+const DRAFT_KEY = (identity: string) => `xinghen.draft.${identity}`
 
 const uuid = (): string => crypto.randomUUID()
 

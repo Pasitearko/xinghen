@@ -7,7 +7,7 @@ import { EASE_OUT } from '../../lib/motion'
 import { PROMPT_COUNT, PROMPTS } from './prompts'
 
 const ALL = '随便'
-const KEY = 'feixing.prompt'
+const KEY = 'xinghen.prompt'
 
 type Card = { group: string; text: string }
 

@@ -1,4 +1,4 @@
-// 迁移测试：Windows 旧版飞星导出的 v4 ZIP 能完整导入，重复导入不产生重复条目。
+// 迁移测试：旧版导出的 v4 ZIP 能完整导入，重复导入不产生重复条目。
 import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -6,8 +6,8 @@ import { join } from 'node:path'
 import { after, test } from 'node:test'
 import { strToU8, zipSync } from 'fflate'
 
-const DATA = mkdtempSync(join(tmpdir(), 'feixing-test-'))
-process.env.FEIXING_DATA_DIR = DATA
+const DATA = mkdtempSync(join(tmpdir(), 'xinghen-test-'))
+process.env.XINGHEN_DATA_DIR = DATA
 // 跑完删掉临时数据目录，不在 /tmp 里留垃圾
 after(() => rmSync(DATA, { recursive: true, force: true }))
 const { ensureDirs } = await import('../paths.ts')
@@ -37,11 +37,11 @@ function oldBackup() {
     ],
     study_todos: [{ id: 5, title: '读书', duration_minutes: 25, break_minutes: 5, completed_pomodoros: 2, is_completed: false, sort_order: 0, created_at: '2026-09-21T01:00:00+00:00', updated_at: '2026-09-21T01:00:00+00:00' }],
     study_sessions: [{ id: 1, session_id: 'sess-0000-0001', todo_id: 5, date_key: '2026-09-21', started_at: '2026-09-21T01:00:00+00:00', ended_at: '2026-09-21T01:25:00+00:00', planned_minutes: 25, focused_seconds: 1500, pomodoros: 1, status: 'finished', tags: [] }],
-    profile: [{ id: 1, name: '飞星', bio_md: '', bio_html: '', avatar_url: '', cover_url: '' }],
+    profile: [{ id: 1, name: '星痕', bio_md: '', bio_html: '', avatar_url: '', cover_url: '' }],
   }
   return Buffer.from(
     zipSync({
-      'manifest.json': strToU8(JSON.stringify({ app: 'feixing', version: 4 })),
+      'manifest.json': strToU8(JSON.stringify({ app: 'xinghen', version: 4 })),
       'tables.json': strToU8(JSON.stringify(tables)),
       'attachments/diary/diary-a.png': PNG,
       'attachments/taste/taste-b.png': PNG,
@@ -51,7 +51,7 @@ function oldBackup() {
 
 test('预览不写库', () => {
   const r = applyBundle(parseUpload(oldBackup()), true)
-  assert.equal(r.kind, 'feixing-windows-v4')
+  assert.equal(r.kind, 'legacy-v4')
   assert.equal(r.diaries.added, 1)
   assert.equal(r.taste.added, 1)
   assert.equal(r.images.added, 2)
@@ -69,7 +69,7 @@ test('导入 v4 备份：正文、图片地址、自习记录都对得上', () =
   assert.match(t.images, /\/api\/images\/taste-b\.png/)
   const s = get<{ todo_id: number }>('SELECT todo_id FROM study_sessions')!
   assert.equal(s.todo_id, get<{ id: number }>('SELECT id FROM study_todos')!.id)
-  assert.equal(get<{ name: string }>('SELECT name FROM profile')!.name, '飞星')
+  assert.equal(get<{ name: string }>('SELECT name FROM profile')!.name, '星痕')
 })
 
 test('重复导入是幂等的', () => {
@@ -83,7 +83,7 @@ test('重复导入是幂等的', () => {
 test('本版导出的备份可以再导回', async () => {
   const out = await exportZip()
   const r = applyBundle(parseUpload(readFileSync(out.path)), true)
-  assert.equal(r.kind, 'feixing-linux')
+  assert.equal(r.kind, 'xinghen')
   assert.equal(r.diaries.skipped, 1)
   assert.equal(r.diaries.added, 0)
 })

@@ -1,17 +1,39 @@
 #!/usr/bin/env bash
-# 飞星启动器（Linux）。不带参数运行 = 确保服务在跑，然后打开浏览器。
+# 星痕启动器（Linux）。不带参数运行 = 确保服务在跑，然后打开浏览器。
 set -euo pipefail
 
 CALLER_PWD="$PWD"
 ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/feixing"
+CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/xinghen"
 CONF="$CONF_DIR/env"
-STATE="${XDG_STATE_HOME:-$HOME/.local/state}/feixing"
-LOG="$STATE/feixing.log"
-PIDFILE="$STATE/feixing.pid"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/xinghen"
+LOG="$STATE/xinghen.log"
+PIDFILE="$STATE/xinghen.pid"
 UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
-UNIT="$UNIT_DIR/feixing.service"
-DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/feixing.desktop"
+UNIT="$UNIT_DIR/xinghen.service"
+DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/xinghen.desktop"
+
+# 改名前（feixing）的配置、日志、自启服务和菜单图标所在位置，只用来把它们迁到新名字下
+LEGACY_CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/feixing"
+LEGACY_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/feixing"
+LEGACY_UNIT="$UNIT_DIR/feixing.service"
+LEGACY_DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/feixing.desktop"
+
+# 配置和日志必须在读配置之前搬好；变量名、旧数据路径一并改成新的
+migrate_legacy_files() {
+  if [[ -d "$LEGACY_CONF_DIR" && ! -e "$CONF_DIR" ]]; then
+    mv "$LEGACY_CONF_DIR" "$CONF_DIR"
+    if [[ -f "$CONF" ]]; then sed -i -e 's/FEIXING_/XINGHEN_/g' -e 's#/\.local/share/feixing#/.local/share/xinghen#g' -e 's#\./feixing#./xinghen#g' -e 's/飞星/星痕/g' "$CONF"; fi
+  fi
+  if [[ -d "$LEGACY_STATE" && ! -e "$STATE" ]]; then
+    mv "$LEGACY_STATE" "$STATE"
+    for f in "$STATE"/feixing.*; do
+      if [[ -e "$f" ]]; then mv "$f" "$STATE/xinghen.${f##*/feixing.}"; fi
+    done
+  fi
+  return 0
+}
+migrate_legacy_files
 
 # 用户配置（端口、音乐目录、代理等），格式是 KEY=VALUE，systemd 服务也读同一份
 if [[ -f "$CONF" ]]; then
@@ -20,7 +42,7 @@ if [[ -f "$CONF" ]]; then
   source "$CONF"
   set +a
 fi
-PORT="${FEIXING_PORT:-8001}"
+PORT="${XINGHEN_PORT:-8001}"
 URL="http://127.0.0.1:$PORT"
 
 # 有代理就让 Node 的 fetch 走代理（抓资讯用）
@@ -28,8 +50,8 @@ if [[ -n "${https_proxy:-}${HTTPS_PROXY:-}${http_proxy:-}${HTTP_PROXY:-}${all_pr
   export NODE_USE_ENV_PROXY=1
 fi
 
-say() { printf '\033[38;5;222m飞星\033[0m %s\n' "$*"; }
-die() { printf '\033[38;5;174m飞星\033[0m %s\n' "$*" >&2; exit 1; }
+say() { printf '\033[38;5;222m星痕\033[0m %s\n' "$*"; }
+die() { printf '\033[38;5;174m星痕\033[0m %s\n' "$*" >&2; exit 1; }
 
 need_node() {
   command -v node >/dev/null 2>&1 || die "没找到 Node.js。请先安装 Node 23.6 或更新的版本（例如 sudo pacman -S nodejs / sudo apt install nodejs）。"
@@ -39,7 +61,7 @@ need_node() {
   minor="${v#*.}"
   minor="${minor%%.*}"
   if (( major < 23 || (major == 23 && minor < 6) )); then
-    die "Node 版本是 $v，飞星需要 23.6 以上（直接运行 TypeScript 和内置 SQLite）。"
+    die "Node 版本是 $v，星痕需要 23.6 以上（直接运行 TypeScript 和内置 SQLite）。"
   fi
 }
 
@@ -79,7 +101,7 @@ healthy() {
   else
     body="$(node -e "fetch('$URL/api/health',{signal:AbortSignal.timeout(1000)}).then(r=>r.text()).then(console.log,()=>process.exit(1))" 2>/dev/null)" || return 1
   fi
-  [[ "$body" == *'"app":"feixing"'* ]]
+  [[ "$body" == *'"app":"xinghen"'* ]]
 }
 
 has_service() { [[ -f "$UNIT" ]] && command -v systemctl >/dev/null 2>&1; }
@@ -93,7 +115,7 @@ start() {
   need_deps
   need_build
   if has_service; then
-    systemctl --user start feixing.service
+    systemctl --user start xinghen.service
   else
     mkdir -p "$STATE"
     # 日志超过 5MB 就轮换一次
@@ -114,8 +136,8 @@ start() {
 }
 
 stop() {
-  if has_service && systemctl --user is-active --quiet feixing.service; then
-    systemctl --user stop feixing.service
+  if has_service && systemctl --user is-active --quiet xinghen.service; then
+    systemctl --user stop xinghen.service
     say "已停止"
     return 0
   fi
@@ -124,7 +146,7 @@ stop() {
     rm -f "$PIDFILE"
     say "已停止"
   elif healthy; then
-    die "飞星在运行，但不是这个启动器开的（看看是不是在别的终端里）。"
+    die "星痕在运行，但不是这个启动器开的（看看是不是在别的终端里）。"
   else
     say "本来就没在运行"
   fi
@@ -157,11 +179,11 @@ install_service() {
   mkdir -p "$UNIT_DIR" "$CONF_DIR" "$(dirname "$DESKTOP")"
   if [[ ! -f "$CONF" ]]; then
     cat > "$CONF" <<'EOF'
-# 飞星的配置，改完运行 ./feixing restart 生效。去掉行首的 # 即启用。
-# FEIXING_PORT=8001
-# FEIXING_MUSIC_DIR=/home/你/Music
-# FEIXING_DATA_DIR=/home/你/.local/share/feixing
-# FEIXING_TZ=Asia/Shanghai
+# 星痕的配置，改完运行 ./xinghen restart 生效。去掉行首的 # 即启用。
+# XINGHEN_PORT=8001
+# XINGHEN_MUSIC_DIR=/home/你/Music
+# XINGHEN_DATA_DIR=/home/你/.local/share/xinghen
+# XINGHEN_TZ=Asia/Shanghai
 # 抓资讯需要代理的话：
 # HTTPS_PROXY=http://127.0.0.1:7890
 # NODE_USE_ENV_PROXY=1
@@ -169,7 +191,7 @@ EOF
   fi
   cat > "$UNIT" <<EOF
 [Unit]
-Description=飞星 本机日记
+Description=星痕 本机日记
 After=network-online.target
 
 [Service]
@@ -188,9 +210,9 @@ EOF
   cat > "$DESKTOP" <<EOF
 [Desktop Entry]
 Type=Application
-Name=飞星
+Name=星痕
 Comment=本机日记与生活空间
-Exec="$ROOT/feixing" open
+Exec="$ROOT/xinghen" open
 Icon=$ROOT/web/public/favicon.svg
 Terminal=false
 Categories=Office;Utility;
@@ -199,15 +221,15 @@ EOF
   # 先停掉手动开的进程，交给 systemd 管
   if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then kill "$(cat "$PIDFILE")"; rm -f "$PIDFILE"; sleep 0.5; fi
   systemctl --user daemon-reload
-  systemctl --user enable --now feixing.service
-  say "已设为开机（登录后）自动启动，应用菜单里也有「飞星」了。"
+  systemctl --user enable --now xinghen.service
+  say "已设为开机（登录后）自动启动，应用菜单里也有「星痕」了。"
   say "配置文件：$CONF"
-  say "查看日志：journalctl --user -u feixing -f"
+  say "查看日志：journalctl --user -u xinghen -f"
 }
 
 uninstall_service() {
   if [[ -f "$UNIT" ]]; then
-    systemctl --user disable --now feixing.service 2>/dev/null || true
+    systemctl --user disable --now xinghen.service 2>/dev/null || true
     rm -f "$UNIT"
     systemctl --user daemon-reload
   fi
@@ -217,7 +239,7 @@ uninstall_service() {
 
 logs() {
   if has_service; then
-    journalctl --user -u feixing -n 100 -f
+    journalctl --user -u xinghen -n 100 -f
   else
     tail -n 100 -f "$LOG"
   fi
@@ -225,39 +247,50 @@ logs() {
 
 usage() {
   cat <<EOF
-飞星 · 本机日记
+星痕 · 本机日记
 
-  ./feixing                 启动（如果还没启动）并打开浏览器
-  ./feixing start           只在后台启动
-  ./feixing stop            停止
-  ./feixing restart         重启（更新代码后用）
-  ./feixing status          看看是否在运行、数据放在哪
-  ./feixing logs            查看日志
-  ./feixing build           重新构建网页
-  ./feixing import <路径>   导入旧数据：旧版数据文件夹 / 备份 zip / JSON；加 --dry 只预览
-  ./feixing install         登录后自动启动 + 加到应用菜单（systemd 用户服务）
-  ./feixing uninstall       取消自动启动
-  ./feixing dev             开发模式（Vite 热更新，端口 5199）
+  ./xinghen                 启动（如果还没启动）并打开浏览器
+  ./xinghen start           只在后台启动
+  ./xinghen stop            停止
+  ./xinghen restart         重启（更新代码后用）
+  ./xinghen status          看看是否在运行、数据放在哪
+  ./xinghen logs            查看日志
+  ./xinghen build           重新构建网页
+  ./xinghen import <路径>   导入旧数据：旧版数据文件夹 / 备份 zip / JSON；加 --dry 只预览
+  ./xinghen install         登录后自动启动 + 加到应用菜单（systemd 用户服务）
+  ./xinghen uninstall       取消自动启动
+  ./xinghen dev             开发模式（Vite 热更新，端口 5199）
 
 地址 $URL
 EOF
 }
 
+# 旧名字的自启服务还在：先停掉、删掉（端口才会空出来），之后换成新名字的服务重新装上
+migrate_legacy_service() {
+  [[ -f "$LEGACY_UNIT" ]] || return 0
+  command -v systemctl >/dev/null 2>&1 && systemctl --user disable --now feixing.service 2>/dev/null || true
+  rm -f "$LEGACY_UNIT" "$LEGACY_DESKTOP"
+  command -v systemctl >/dev/null 2>&1 && systemctl --user daemon-reload || true
+  say "已移除旧名字（feixing）的自启服务，改用 xinghen.service"
+  install_service
+}
+
 cmd="${1:-open}"
 shift || true
+case "$cmd" in help | -h | --help | uninstall) ;; *) migrate_legacy_service ;; esac
 case "$cmd" in
   open) start && open_browser ;;
   start) start ;;
   stop) stop ;;
   restart)
-    if has_service; then need_build; systemctl --user restart feixing.service; sleep 0.5; start; else stop; start; fi ;;
+    if has_service; then need_build; systemctl --user restart xinghen.service; sleep 0.5; start; else stop; start; fi ;;
   status) status ;;
   logs | log) logs ;;
   build) need_node; need_deps; build ;;
   import)
     need_node
     need_deps
-    [[ $# -ge 1 ]] || die "用法：./feixing import <路径> [--dry]"
+    [[ $# -ge 1 ]] || die "用法：./xinghen import <路径> [--dry]"
     cd "$ROOT"
     # 相对路径按调用时的目录解析
     target="$1"; shift

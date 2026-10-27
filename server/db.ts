@@ -133,6 +133,8 @@ export const db = new DatabaseSync(DB_PATH, { enableForeignKeyConstraints: true 
 db.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 3000;')
 db.exec(SCHEMA)
 db.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`)
+// 内置壁纸改名后，把已选的旧文件名换成新的（没有就什么也不做）
+db.exec("UPDATE kv SET value = replace(value, 'preset:feixing-day.jpg', 'preset:xinghen-day.jpg') WHERE key = 'wallpaper' AND value LIKE '%preset:feixing-day.jpg%'")
 
 type Params = SQLInputValue[]
 type Row = Record<string, unknown>

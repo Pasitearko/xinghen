@@ -7,8 +7,8 @@ import { analyze, canonicalUrl, classify, clusterEvents, modelKeys } from '../ne
 import { parseCards, parseDated, parseDeepseek, parseFeed, parseGithub, parseOpenaiApi } from '../news-parsers.ts'
 import type { ItemRow, Source } from '../news-types.ts'
 
-const DATA = mkdtempSync(join(tmpdir(), 'feixing-news-test-'))
-process.env.FEIXING_DATA_DIR = DATA
+const DATA = mkdtempSync(join(tmpdir(), 'xinghen-news-test-'))
+process.env.XINGHEN_DATA_DIR = DATA
 const { ensureDirs } = await import('../paths.ts')
 ensureDirs()
 const { all, db, run } = await import('../db.ts')

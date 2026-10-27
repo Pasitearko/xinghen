@@ -31,9 +31,9 @@ function load(file: string): Entry | null {
   return entry
 }
 
-const NOT_BUILT = `<!doctype html><meta charset="utf-8"><title>飞星</title>
+const NOT_BUILT = `<!doctype html><meta charset="utf-8"><title>星痕</title>
 <body style="font:16px system-ui;background:#141c33;color:#e6ecf5;display:grid;place-items:center;height:100vh;margin:0">
-<div><h1 style="font-weight:300">网页还没构建</h1><p>在项目目录运行 <code>./feixing build</code> 或 <code>./feixing start</code>。</p></div>`
+<div><h1 style="font-weight:300">网页还没构建</h1><p>在项目目录运行 <code>./xinghen build</code> 或 <code>./xinghen start</code>。</p></div>`
 
 export function serveStatic(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url || '/', 'http://localhost')

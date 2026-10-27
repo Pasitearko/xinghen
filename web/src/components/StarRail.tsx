@@ -63,8 +63,8 @@ export function StarRail({ onSearch, onSettings }: { onSearch: () => void; onSet
   return (
     <>
       <nav className="rail" aria-label="栏目">
-        <Link href="/" className="rail-brand" aria-label="飞星首页">
-          <span className="rail-brand-text">飞星</span>
+        <Link href="/" className="rail-brand" aria-label="星痕首页">
+          <span className="rail-brand-text">星痕</span>
         </Link>
         <ul className="rail-list">
           <span className="rail-line" aria-hidden />

@@ -1,5 +1,5 @@
-// 命令行导入：./feixing import <路径> [--dry]
-// 路径可以是旧版飞星的数据文件夹（含 feixing.db 与 uploads/）、备份 zip、旧数据库或 JSON。
+// 命令行导入：./xinghen import <路径> [--dry]
+// 路径可以是另一份数据文件夹（含 xinghen.db 或旧版的 feixing.db，以及 uploads/）、备份 zip、单个数据库文件或 JSON。
 // 导入是合并：已有的不会重复，也不会覆盖。服务开着也能导入（SQLite WAL）。
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
@@ -9,7 +9,7 @@ const args = process.argv.slice(2)
 const dry = args.includes('--dry')
 const target = args.find((a) => !a.startsWith('--'))
 if (!target) {
-  console.error('用法：./feixing import <旧数据文件夹 | 备份.zip | feixing.db | 备份.json> [--dry]')
+  console.error('用法：./xinghen import <旧数据文件夹 | 备份.zip | xinghen.db | 备份.json> [--dry]')
   process.exit(2)
 }
 const path = resolve(target)

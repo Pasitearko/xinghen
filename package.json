@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "星痕：Linux 版飞星，本机运行的个人日记与生活空间",
+  "description": "星痕：在 Linux 本机运行的个人日记与生活空间",
   "engines": {
     "node": ">=23.6.0"
   },

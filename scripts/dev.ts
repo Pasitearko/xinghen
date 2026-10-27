@@ -6,7 +6,7 @@ const root = join(import.meta.dirname, '..')
 const bin = (name: string) => join(root, 'node_modules', '.bin', name)
 
 const procs = [
-  spawn(process.execPath, ['--watch', 'server/main.ts'], { cwd: root, stdio: 'inherit', env: { ...process.env, FEIXING_NO_JOBS: process.env.FEIXING_NO_JOBS ?? '1' } }),
+  spawn(process.execPath, ['--watch', 'server/main.ts'], { cwd: root, stdio: 'inherit', env: { ...process.env, XINGHEN_NO_JOBS: process.env.XINGHEN_NO_JOBS ?? '1' } }),
   spawn(bin('vite'), ['--config', 'web/vite.config.ts'], { cwd: root, stdio: 'inherit' }),
 ]
 

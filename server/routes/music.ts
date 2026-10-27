@@ -1,4 +1,4 @@
-// 本地音乐：扫描音乐目录（默认 ~/.local/share/feixing/music，可用 FEIXING_MUSIC_DIR 指到 ~/Music），
+// 本地音乐：扫描音乐目录（默认 ~/.local/share/xinghen/music，可用 XINGHEN_MUSIC_DIR 指到 ~/Music），
 // 读取 ID3 / FLAC 标签里的曲名、歌手和封面；同名 .lrc 作为歌词。只按扫描得到的 ID 取文件，不接受路径参数。
 // 扫描结果存成索引（数据目录下的 music-index.json），取歌、封面、歌词都直接查索引，不再临时扫目录。
 import { createHash } from 'node:crypto'
@@ -176,22 +176,31 @@ async function readFlac(fh: FileHandle): Promise<Tags | null> {
 // 索引存在数据目录里，重启后直接可用；扫描在后台异步进行，同一时间只跑一次。
 // 文件的修改时间和大小都没变就沿用上次读到的标签，只有新增或改过的文件才重新读。
 const INDEX_FILE = join(DATA_DIR, 'music-index.json')
-const INDEX_VERSION = 1
+// v2 起索引里只存相对音乐目录的路径：整个数据目录或音乐目录搬家后，索引照样能用
+const INDEX_VERSION = 2
 
 let tracks: Track[] = []
 let byId = new Map<string, Track>()
 let scannedAt = 0
 let scanning: Promise<Track[]> | null = null
+/** 索引是在别的音乐目录下建的：先当缓存用，第一次取歌单时等核对完再返回 */
+let stale = false
 
 function setTracks(list: Track[]) {
   tracks = list
   byId = new Map(list.map((t) => [t.id, t]))
 }
 
+const toRel = (p: string | null) => p && relative(MUSIC_DIR, p)
 function loadIndex() {
   try {
     const saved = JSON.parse(readFileSync(INDEX_FILE, 'utf8')) as { v: number; dir: string; tracks: Track[] }
-    if (saved.v === INDEX_VERSION && saved.dir === MUSIC_DIR && Array.isArray(saved.tracks)) setTracks(saved.tracks)
+    if (!Array.isArray(saved.tracks) || (saved.v !== 1 && saved.v !== INDEX_VERSION)) return
+    // v1 存的是绝对路径，按当时的音乐目录换成相对路径
+    const rel = (p: string | null) => p && (saved.v === 1 ? relative(saved.dir, p) : p)
+    const abs = (p: string | null) => p && join(MUSIC_DIR, rel(p)!)
+    setTracks(saved.tracks.map((t) => ({ ...t, path: abs(t.path)!, lyrics: abs(t.lyrics), coverFile: abs(t.coverFile) })))
+    stale = saved.dir !== MUSIC_DIR
   } catch {
     /* 第一次运行或索引坏了：重新扫 */
   }
@@ -225,12 +234,19 @@ async function describe(path: string, names: Set<string>, prev: Track | undefine
     return null
   }
   const mtime = st.mtimeMs
-  if (prev && prev.size === st.size && prev.mtime === mtime) return prev
   const rel = relative(MUSIC_DIR, path)
   const ext = extname(path).toLowerCase()
   const file = basename(path)
   const stemName = file.slice(0, -ext.length)
   const dir = path.slice(0, path.length - file.length)
+  // 歌词和封面图是旁边的独立文件，歌没改也可能新放进来，所以每次都按目录里的文件名重新找（不读盘）
+  const IMG = ['.jpg', '.png', '.webp']
+  const cover = IMG.map((e) => stemName + e).find((n) => names.has(n)) || COVER_NAMES.flatMap((n) => IMG.map((e) => n + e)).find((n) => names.has(n))
+  const sidecars = {
+    lyrics: names.has(`${stemName}.lrc`) ? join(dir, `${stemName}.lrc`) : null,
+    coverFile: cover ? join(dir, cover) : null,
+  }
+  if (prev && prev.size === st.size && prev.mtime === mtime) return { ...prev, path, ...sidecars }
   let tags: Tags | null = null
   if (ext === '.mp3' || ext === '.flac') {
     const fh = await open(path, 'r').catch(() => null)
@@ -245,16 +261,13 @@ async function describe(path: string, names: Set<string>, prev: Track | undefine
     }
   }
   const byName = fromFilename(file)
-  const IMG = ['.jpg', '.png', '.webp']
-  const cover = IMG.map((e) => stemName + e).find((n) => names.has(n)) || COVER_NAMES.flatMap((n) => IMG.map((e) => n + e)).find((n) => names.has(n))
   return {
     id: createHash('sha1').update(rel).digest('hex').slice(0, 16),
     path,
     title: tags?.title || byName.title,
     artist: tags?.artist || byName.artist,
     album: tags?.album || '',
-    lyrics: names.has(`${stemName}.lrc`) ? join(dir, `${stemName}.lrc`) : null,
-    coverFile: cover ? join(dir, cover) : null,
+    ...sidecars,
     picture: tags?.picture || null,
     size: st.size,
     mtime,
@@ -280,8 +293,10 @@ function scan(): Promise<Track[]> {
       const list = out.filter((t): t is Track => !!t)
       setTracks(list)
       scannedAt = Date.now()
+      stale = false
       const tmp = `${INDEX_FILE}.tmp`
-      await writeFile(tmp, JSON.stringify({ v: INDEX_VERSION, dir: MUSIC_DIR, tracks: list }))
+      const saved = list.map((t) => ({ ...t, path: toRel(t.path), lyrics: toRel(t.lyrics), coverFile: toRel(t.coverFile) }))
+      await writeFile(tmp, JSON.stringify({ v: INDEX_VERSION, dir: MUSIC_DIR, tracks: saved }))
       await rename(tmp, INDEX_FILE)
       return list
     } finally {
@@ -301,7 +316,7 @@ async function find(id: string) {
 
 route.get('/api/music/tracks', async (ctx) => {
   // 手动「重新扫描」或还没有索引时等扫完；平时直接用索引，后台顺便核对一遍（每次启动后第一次打开时）
-  if (ctx.query.get('refresh') === '1' || !tracks.length) await scan()
+  if (ctx.query.get('refresh') === '1' || !tracks.length || stale) await scan()
   else if (!scannedAt) void scan()
   const sharedCover = await sharedCoverFile()
   return {

@@ -15,8 +15,8 @@ import './home.css'
 function Greeting({ text }: { text: string }) {
   const [played] = useState(() => {
     try {
-      const seen = sessionStorage.getItem('feixing.greeted')
-      sessionStorage.setItem('feixing.greeted', '1')
+      const seen = sessionStorage.getItem('xinghen.greeted')
+      sessionStorage.setItem('xinghen.greeted', '1')
       return !!seen
     } catch {
       return false

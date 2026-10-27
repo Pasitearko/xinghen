@@ -53,7 +53,7 @@ function gnews(q: string) {
 }
 
 // ---------- 抓取与入库 ----------
-const UA = 'Mozilla/5.0 (X11; Linux x86_64) FeixingNews/2.0 (+local personal use)'
+const UA = 'Mozilla/5.0 (X11; Linux x86_64) XinghenNews/2.0 (+local personal use)'
 
 async function fetchText(url: string) {
   const res = await fetch(url, {

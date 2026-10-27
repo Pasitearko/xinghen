@@ -32,27 +32,29 @@ sudo apt install -y nodejs git
 ```bash
 git clone https://github.com/Pasitearko/xinghen.git
 cd xinghen
-./feixing
+./xinghen
 ```
 
-第一次运行会自动安装依赖、构建网页、在后台启动服务，然后打开浏览器。之后想打开，再运行一次 `./feixing` 就行。
+第一次运行会自动安装依赖、构建网页、在后台启动服务，然后打开浏览器。之后想打开，再运行一次 `./xinghen` 就行。
 
 ### 3. 设成登录后自动启动（推荐）
 
 ```bash
-./feixing install
+./xinghen install
 ```
 
-以后每次登录桌面，星痕都会在后台自动启动，直接在浏览器打开 <http://127.0.0.1:8001> 即可。建议把它加成书签或设为主页。应用菜单里也会多一个「飞星」图标。
+以后每次登录桌面，星痕都会在后台自动启动，直接在浏览器打开 <http://127.0.0.1:8001> 即可。建议把它加成书签或设为主页。应用菜单里也会多一个「星痕」图标。
 
 ### 更新与卸载
 
 ```bash
-git pull && ./feixing restart     # 更新到最新版
-./feixing uninstall               # 取消自动启动
+git pull && ./xinghen restart     # 更新到最新版
+./xinghen uninstall               # 取消自动启动
 ```
 
-要彻底卸载，先运行 `./feixing uninstall`，再删掉代码文件夹即可。日记等数据在 `~/.local/share/feixing/`，不会随代码一起删除；确定不要了再手动删掉它。
+从改名前的版本（启动器叫 `./feixing`）更新时，`git pull` 之后运行一次 `./xinghen restart` 就行：数据目录、配置文件、自启服务和浏览器里保存的设置会自动迁到新名字下，日记不受影响。
+
+要彻底卸载，先运行 `./xinghen uninstall`，再删掉代码文件夹即可。日记等数据在 `~/.local/share/xinghen/`，不会随代码一起删除；确定不要了再手动删掉它。
 
 ## 功能
 
@@ -125,7 +127,7 @@ git pull && ./feixing restart     # 更新到最新版
 - 键盘媒体键和桌面的媒体控件（MPRIS）都能控制播放
 - 曲库扫描在后台进行，只重新读新增或改过的文件，曲库再大也不会拖慢写日记
 
-**添加歌曲**：把音乐文件放进 `~/.local/share/feixing/music/`，然后在歌单里点「重新扫描」。已有音乐目录（比如 `~/Music`）的话，在[配置](#配置)里用 `FEIXING_MUSIC_DIR` 指过去即可。
+**添加歌曲**：把音乐文件放进 `~/.local/share/xinghen/music/`，然后在歌单里点「重新扫描」。已有音乐目录（比如 `~/Music`）的话，在[配置](#配置)里用 `XINGHEN_MUSIC_DIR` 指过去即可。
 
 <br clear="right">
 
@@ -183,7 +185,7 @@ git pull && ./feixing restart     # 更新到最新版
 | 部分 | 用了什么 | 说明 |
 | --- | --- | --- |
 | 运行时 | [Node.js](https://nodejs.org) 23.6+ | 直接运行 TypeScript 源码，不需要编译步骤 |
-| 数据库 | `node:sqlite`（Node 内置的 SQLite） | 一个 `feixing.db` 文件，WAL 模式 |
+| 数据库 | `node:sqlite`（Node 内置的 SQLite） | 一个 `xinghen.db` 文件，WAL 模式 |
 | 后端 | `node:http` + 自己写的小路由 | 没有 Express 之类的框架；静态文件预压缩成 Brotli / Gzip 放在内存里 |
 | 备份 | [fflate](https://github.com/101arrowz/fflate) | 在 Worker 线程里打包 zip，导出时不卡界面；也是唯一的运行时依赖 |
 | 前端 | [React 19](https://react.dev) + [Vite](https://vite.dev) | 路由用 [wouter](https://github.com/molefrog/wouter)，数据请求与缓存用 [TanStack Query](https://tanstack.com/query) |
@@ -191,7 +193,7 @@ git pull && ./feixing restart     # 更新到最新版
 | 动效 | [Motion](https://motion.dev) | 页面切换、共享元素展开、数字滚动等 |
 | 图标 | [Lucide](https://lucide.dev) | |
 | 字体 | Source Serif 4 + 思源宋体 | 西文和数字用 Source Serif 4，中文用系统里的思源宋体（Noto Serif CJK） |
-| 后台服务 | systemd 用户服务 | `./feixing install` 生成，服务意外退出时自动重启 |
+| 后台服务 | systemd 用户服务 | `./xinghen install` 生成，服务意外退出时自动重启 |
 | 开发 | TypeScript、`node:test` | `pnpm check` 类型检查，`pnpm test` 跑测试 |
 
 安全方面：服务只监听 `127.0.0.1`，写请求只接受本机页面发来的，其他网站没法偷偷调用接口。
@@ -201,39 +203,39 @@ git pull && ./feixing restart     # 更新到最新版
 遵循 XDG 规范，代码目录里不存任何私人数据：
 
 ```
-~/.local/share/feixing/
-├── feixing.db        日记、收藏、自习记录、个人资料（SQLite）
+~/.local/share/xinghen/
+├── xinghen.db        日记、收藏、自习记录、个人资料（SQLite）
 ├── uploads/          图片附件
 ├── backups/          自动备份和手动导出的 zip
 ├── music/            默认的音乐文件夹
 └── music-index.json  曲库索引（删掉也没关系，下次会重新扫描）
 ```
 
-想整个搬家的话，先 `./feixing stop`，再把这个文件夹拷走。
+想整个搬家的话，先 `./xinghen stop`，再把这个文件夹拷走。
 
 ### 导入与迁移
 
 导入都是**合并导入**：已有的内容不会重复，也不会被覆盖，可以放心多导几次。
 
 - **备份 zip（推荐）**：在旧电脑的「档案室 → 备份」导出 zip，拷到新电脑后，在「档案室 → 备份 → 导入与迁移」里选择这个文件，先看预览再确认
-- **整个数据文件夹**：把旧的数据文件夹（里面有 `feixing.db` 和 `uploads/`）拷过来，然后：
+- **整个数据文件夹**：把旧的数据文件夹（里面有 `xinghen.db` 和 `uploads/`）拷过来，然后：
 
   ```bash
-  ./feixing import ~/下载/feixing --dry   # 先预览，不写入
-  ./feixing import ~/下载/feixing
+  ./xinghen import ~/下载/xinghen --dry   # 先预览，不写入
+  ./xinghen import ~/下载/xinghen
   ```
 
 更早的 JSON 导出也能导入，里面内联的 base64 图片会自动存成本机文件。
 
 ## 配置
 
-配置文件是 `~/.config/feixing/env`（`./feixing install` 时自动生成，也可以自己创建）。每行一个 `KEY=VALUE`，去掉行首的 `#` 即生效，改完运行 `./feixing restart`：
+配置文件是 `~/.config/xinghen/env`（`./xinghen install` 时自动生成，也可以自己创建）。每行一个 `KEY=VALUE`，去掉行首的 `#` 即生效，改完运行 `./xinghen restart`：
 
 ```ini
-FEIXING_PORT=8001                    # 端口
-FEIXING_MUSIC_DIR=/home/你/Music      # 音乐目录
-FEIXING_DATA_DIR=/home/你/.local/share/feixing
-FEIXING_TZ=Asia/Shanghai             # 「今天」按哪个时区算，默认跟随系统
+XINGHEN_PORT=8001                    # 端口
+XINGHEN_MUSIC_DIR=/home/你/Music      # 音乐目录
+XINGHEN_DATA_DIR=/home/你/.local/share/xinghen
+XINGHEN_TZ=Asia/Shanghai             # 「今天」按哪个时区算，默认跟随系统
 HTTPS_PROXY=http://127.0.0.1:7890    # 抓资讯用的代理
 ```
 
@@ -241,15 +243,15 @@ HTTPS_PROXY=http://127.0.0.1:7890    # 抓资讯用的代理
 
 | 命令 | 作用 |
 | --- | --- |
-| `./feixing` | 没启动就启动，然后打开浏览器 |
-| `./feixing start` / `stop` / `restart` | 后台启动、停止、重启 |
-| `./feixing status` | 是否在运行，数据、音乐、备份各放在哪 |
-| `./feixing logs` | 查看日志 |
-| `./feixing build` | 重新构建网页（改了源码后 `start` 也会自动构建） |
-| `./feixing import <路径>` | 导入数据，加 `--dry` 只预览不写入 |
-| `./feixing install` | 登录后自动启动，并加到应用菜单 |
-| `./feixing uninstall` | 取消自动启动（不删数据） |
-| `./feixing dev` | 开发模式，Vite 热更新在 <http://127.0.0.1:5199> |
+| `./xinghen` | 没启动就启动，然后打开浏览器 |
+| `./xinghen start` / `stop` / `restart` | 后台启动、停止、重启 |
+| `./xinghen status` | 是否在运行，数据、音乐、备份各放在哪 |
+| `./xinghen logs` | 查看日志 |
+| `./xinghen build` | 重新构建网页（改了源码后 `start` 也会自动构建） |
+| `./xinghen import <路径>` | 导入数据，加 `--dry` 只预览不写入 |
+| `./xinghen install` | 登录后自动启动，并加到应用菜单 |
+| `./xinghen uninstall` | 取消自动启动（不删数据） |
+| `./xinghen dev` | 开发模式，Vite 热更新在 <http://127.0.0.1:5199> |
 
 ## 开发
 

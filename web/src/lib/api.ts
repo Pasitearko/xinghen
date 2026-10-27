@@ -18,7 +18,7 @@ async function request<T>(method: string, url: string, body?: unknown, headers?:
       body: body === undefined ? undefined : isRaw ? (body as BodyInit) : JSON.stringify(body),
     })
   } catch {
-    throw new ApiError(0, '连不上本机服务：飞星后台可能没在运行', null)
+    throw new ApiError(0, '连不上本机服务：星痕后台可能没在运行', null)
   }
   if (res.status === 204) return undefined as T
   const text = await res.text()

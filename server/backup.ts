@@ -1,6 +1,6 @@
 // 备份与迁移。
 // - 导出：ZIP（manifest.json + tables.json + attachments/<scope>/<file>），每天自动备份一份，保留最近 7 份；
-// - 导入：本版导出的 ZIP、Windows 旧版飞星的 v4 ZIP、旧版飞星的数据目录（feixing.db + uploads/）、
+// - 导入：本版导出的 ZIP、旧版的 v4 ZIP、另一份数据目录（xinghen.db 或旧版的 feixing.db + uploads/）、
 //   更早的旧站 JSON（扁平日记 / {diary, taste}）。导入是「合并」：已存在的条目跳过，不覆盖现有内容。
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
@@ -50,7 +50,7 @@ async function writeAtomic(target: string, data: Uint8Array) {
 let exporting: ReturnType<typeof doExport> | null = null
 
 /** 同一时间只做一份完整备份：连点几次「导出」或碰上自动备份，都等同一份 */
-export function exportZip(prefix = 'feixing-backup') {
+export function exportZip(prefix = 'xinghen-backup') {
   exporting ??= doExport(prefix).finally(() => (exporting = null))
   return exporting
 }
@@ -72,7 +72,7 @@ async function doExport(prefix: string) {
   }
   const tablesJson = strToU8(JSON.stringify(tables))
   const manifest = {
-    app: 'feixing',
+    app: 'xinghen',
     version: FORMAT_VERSION,
     platform: 'linux',
     created_at: nowIso(),
@@ -114,7 +114,7 @@ export async function exportMarkdown() {
     files[name] = strToU8(`${head.join('\n')}\n${r.title ? `# ${r.title}\n\n` : ''}${r.content_md}\n`)
   }
   const out = await zipAsync(files)
-  const name = `feixing-diary-markdown-${stamp()}.zip`
+  const name = `xinghen-diary-markdown-${stamp()}.zip`
   const target = join(BACKUP_DIR, name)
   await writeAtomic(target, out)
   return { name, path: target, size: out.length, count: rows.length }
@@ -126,7 +126,7 @@ export function listBackups() {
       .filter((f) => f.endsWith('.zip'))
       .map((f) => {
         const st = statSync(join(BACKUP_DIR, f))
-        return { name: f, size: st.size, created_at: st.mtime.toISOString(), auto: f.startsWith('feixing-auto') }
+        return { name: f, size: st.size, created_at: st.mtime.toISOString(), auto: f.startsWith('xinghen-auto') }
       })
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
   } catch {
@@ -139,7 +139,7 @@ export async function autoBackup() {
   const last = kvGet<string>('backup.auto_day', '')
   const hasData = get<{ n: number }>('SELECT (SELECT COUNT(*) FROM diary_entries) + (SELECT COUNT(*) FROM taste_items) n')!.n
   if (last === todayKey() || !hasData) return null
-  const out = await exportZip('feixing-auto')
+  const out = await exportZip('xinghen-auto')
   kvSet('backup.auto_day', todayKey())
   const autos = listBackups().filter((b) => b.auto)
   for (const old of autos.slice(7)) rmSync(join(BACKUP_DIR, old.name), { force: true })
@@ -176,7 +176,7 @@ function fromZip(buf: Uint8Array): Bundle {
   try {
     entries = unzipSync(buf, { filter: (f) => f.originalSize < 512 * 1024 * 1024 })
   } catch {
-    throw new HttpError(400, '这个 ZIP 文件损坏或不是飞星备份')
+    throw new HttpError(400, '这个 ZIP 文件损坏或不是星痕备份')
   }
   const manifest = entries['manifest.json'] ? JSON.parse(textDecoder.decode(entries['manifest.json'])) : null
   const files = new Map<string, Uint8Array>()
@@ -186,14 +186,14 @@ function fromZip(buf: Uint8Array): Bundle {
   }
   if (entries['tables.json']) {
     const tables = JSON.parse(textDecoder.decode(entries['tables.json'])) as Tables
-    return { kind: manifest?.version >= 5 ? 'feixing-linux' : 'feixing-windows-v4', tables, files, notes: [] }
+    return { kind: manifest?.version >= 5 ? 'xinghen' : 'legacy-v4', tables, files, notes: [] }
   }
   // 更早的旧版 ZIP：只有 diary.json / taste_items.json
   const tables: Tables = {}
   if (entries['diary.json']) tables.diary_entries = JSON.parse(textDecoder.decode(entries['diary.json']))
   if (entries['taste_items.json']) tables.taste_items = JSON.parse(textDecoder.decode(entries['taste_items.json']))
-  if (!tables.diary_entries && !tables.taste_items) throw new HttpError(400, 'ZIP 里没有找到飞星的数据文件（tables.json）')
-  return { kind: 'feixing-zip-legacy', tables, files, notes: [] }
+  if (!tables.diary_entries && !tables.taste_items) throw new HttpError(400, 'ZIP 里没有找到星痕的数据文件（tables.json）')
+  return { kind: 'legacy-zip', tables, files, notes: [] }
 }
 
 function fromLegacyJson(value: unknown): Bundle {
@@ -221,7 +221,7 @@ function fromLegacyJson(value: unknown): Bundle {
   }
   if (!('diary' in obj) && !('taste' in obj) && !('trash' in obj)) {
     for (const [k, v] of Object.entries(obj)) pushDiary(k, v)
-    if (!diaries.length) throw new HttpError(400, '没认出这个 JSON：既不是飞星备份，也不像旧站的日记备份')
+    if (!diaries.length) throw new HttpError(400, '没认出这个 JSON：既不是星痕备份，也不像旧站的日记备份')
     return { kind: 'legacy-diary-json', tables: { diary_entries: diaries }, files: new Map(), notes }
   }
   if (obj.diary && typeof obj.diary === 'object') for (const [k, v] of Object.entries(obj.diary)) pushDiary(k, v)
@@ -249,9 +249,9 @@ function fromLegacyJson(value: unknown): Bundle {
   return { kind: 'legacy-mixed-json', tables: { diary_entries: diaries, taste_items: taste }, files: new Map(), notes }
 }
 
-/** 旧版飞星（Windows）的数据目录：%LOCALAPPDATA%\Feixing，里面有 feixing.db 与 uploads/。 */
+/** 另一份数据目录：里面有 xinghen.db（或旧版的 feixing.db）与 uploads/；也可以直接给数据库文件。 */
 export function fromOldDataDir(dir: string): Bundle {
-  const dbFile = existsSync(join(dir, 'feixing.db')) ? join(dir, 'feixing.db') : dir
+  const dbFile = ['xinghen.db', 'feixing.db'].map((f) => join(dir, f)).find((f) => existsSync(f)) || dir
   if (!existsSync(dbFile)) throw new HttpError(400, `找不到 ${dbFile}`)
   const old = new DatabaseSync(dbFile, { readOnly: true })
   const tables: Tables = {}
@@ -270,7 +270,7 @@ export function fromOldDataDir(dir: string): Bundle {
     if (!existsSync(sd)) continue
     for (const f of readdirSync(sd)) if (/^[A-Za-z0-9_.-]+$/.test(f)) files.set(`${scope}/${f}`, readFileSync(join(sd, f)))
   }
-  return { kind: 'feixing-windows-dir', tables, files, notes: [] }
+  return { kind: 'data-dir', tables, files, notes: [] }
 }
 
 export function parseUpload(buf: Buffer, filename = ''): Bundle {

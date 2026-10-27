@@ -155,7 +155,7 @@ export async function dispatch(req: IncomingMessage, res: ServerResponse): Promi
       if (err instanceof HttpError) {
         sendJson(res, err.status, { detail: err.message })
       } else {
-        console.error(`[feixing] ${method} ${path}`, err)
+        console.error(`[xinghen] ${method} ${path}`, err)
         sendJson(res, 500, { detail: '服务内部错误，详情见日志' })
       }
     }

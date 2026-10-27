@@ -1,9 +1,9 @@
-/* 飞星 · 星夜手帐
+/* 星痕 · 星夜手帐
    夜：靛蓝天幕上的月白文字，星芒金只给「此刻/选中/保存」这类要被看见的东西。
    晨：拂晓的蓝粉天光，墨色文字，金色压暗成铜。 */
 
 :root {
-  --serif: 'Feixing Serif', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
+  --serif: 'Xinghen Serif', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
   --sans: 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
   --kai: 'LXGW WenKai', 'LXGW WenKai Mono', '霞鹜文楷', 'Kaiti SC', 'KaiTi', 'STKaiti', var(--serif);
   --mono: 'Maple Mono NF CN', 'JetBrains Mono', 'Noto Sans Mono CJK SC', ui-monospace, monospace;

@@ -11,11 +11,11 @@ const loaders = {
 export type RoutePath = keyof typeof loaders
 
 export const ROUTES: { path: RoutePath; label: string; title: string }[] = [
-  { path: '/', label: '首页', title: '飞星' },
-  { path: '/diary', label: '日记', title: '日记 · 飞星' },
-  { path: '/taste', label: '品味', title: '品味库 · 飞星' },
-  { path: '/study', label: '自习', title: '自习室 · 飞星' },
-  { path: '/archive', label: '档案', title: '档案室 · 飞星' },
+  { path: '/', label: '首页', title: '星痕' },
+  { path: '/diary', label: '日记', title: '日记 · 星痕' },
+  { path: '/taste', label: '品味', title: '品味库 · 星痕' },
+  { path: '/study', label: '自习', title: '自习室 · 星痕' },
+  { path: '/archive', label: '档案', title: '档案室 · 星痕' },
 ]
 
 export const PAGES = Object.fromEntries(Object.entries(loaders).map(([k, load]) => [k, lazy(load)])) as unknown as Record<RoutePath, ReturnType<typeof lazy>>

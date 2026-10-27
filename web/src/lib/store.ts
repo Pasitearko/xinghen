@@ -50,7 +50,7 @@ const DEFAULT_PREFS: Prefs = {
 
 function loadPrefs(): Prefs {
   try {
-    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem('feixing.prefs') || '{}') }
+    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem('xinghen.prefs') || '{}') }
   } catch {
     return DEFAULT_PREFS
   }
@@ -59,7 +59,7 @@ function loadPrefs(): Prefs {
 export const prefs = createStore<Prefs>(loadPrefs())
 prefs.subscribe(() => {
   try {
-    localStorage.setItem('feixing.prefs', JSON.stringify(prefs.get()))
+    localStorage.setItem('xinghen.prefs', JSON.stringify(prefs.get()))
   } catch {
     /* 隐私模式下写不进去也无妨 */
   }
@@ -120,7 +120,7 @@ export function toast(text: string, tone: Toast['tone'] = 'ok') {
   setTimeout(() => toasts.set((s) => ({ items: s.items.filter((t) => t.id !== id) })), tone === 'error' ? 5200 : 2800)
 }
 
-// ---------- 飞星：保存成功等时刻划过一颗 ----------
+// ---------- 流星：保存成功等时刻划过一颗 ----------
 export function meteor() {
-  window.dispatchEvent(new CustomEvent('feixing:meteor'))
+  window.dispatchEvent(new CustomEvent('xinghen:meteor'))
 }

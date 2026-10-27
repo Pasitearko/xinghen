@@ -86,5 +86,5 @@ route.get('/api/wallpapers/preset/:name', (ctx) => {
   return sendFile(ctx.req, ctx.res, join(WALLPAPER_PRESETS, name), { cache: 'public, max-age=86400' })
 })
 
-route.get('/api/health', () => ({ ok: true, app: 'feixing', pid: process.pid, today: todayKey(), started_at: STARTED }))
+route.get('/api/health', () => ({ ok: true, app: 'xinghen', pid: process.pid, today: todayKey(), started_at: STARTED }))
 const STARTED = nowIso()

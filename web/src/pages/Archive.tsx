@@ -377,10 +377,10 @@ function Backup() {
     onError: (e: Error) => toast(e.message, 'error'),
   })
   const KIND: Record<string, string> = {
-    'feixing-linux': '飞星（Linux 版）完整备份',
-    'feixing-windows-v4': '旧版飞星（Windows）完整备份',
-    'feixing-windows-dir': '旧版飞星数据库',
-    'feixing-zip-legacy': '旧版飞星备份',
+    xinghen: '星痕完整备份',
+    'legacy-v4': '旧版完整备份',
+    'data-dir': '数据库文件',
+    'legacy-zip': '旧版备份',
     'legacy-diary-json': '旧站日记 JSON',
     'legacy-mixed-json': '旧站 JSON 备份',
   }
@@ -388,7 +388,7 @@ function Backup() {
     <div className="backup">
       <section className="glass panel-pad">
         <h2 className="panel-title">导出</h2>
-        <p className="muted">完整备份包含日记、收藏、自习记录、个人资料和所有图片，可以原样导回。每天第一次打开飞星时也会自动备份一份，保留最近 7 份。</p>
+        <p className="muted">完整备份包含日记、收藏、自习记录、个人资料和所有图片，可以原样导回。每天第一次打开星痕时也会自动备份一份，保留最近 7 份。</p>
         <div className="backup-actions">
           <button className="btn btn--primary" onClick={() => exp.mutate('export')} disabled={exp.isPending}>
             <FileArchive size={16} />
@@ -403,7 +403,7 @@ function Backup() {
 
       <section className="glass panel-pad">
         <h2 className="panel-title">导入与迁移</h2>
-        <p className="muted">可以导入本版的备份、Windows 旧版飞星导出的完整备份（.zip）、旧站的 JSON 备份。导入是合并：已经有的不会重复，也不会覆盖现在的内容。先预览，确认后才写入。</p>
+        <p className="muted">可以导入星痕的完整备份（.zip）、旧版的完整备份、单个数据库文件（.db）和旧站的 JSON 备份。导入是合并：已经有的不会重复，也不会覆盖现在的内容。先预览，确认后才写入。</p>
         <label className="drop">
           <Upload size={20} />
           <span>{file ? file.name : '选择备份文件'}</span>
@@ -454,7 +454,7 @@ function Backup() {
           )}
         </AnimatePresence>
         <p className="faint backup-tip">
-          从 Windows 迁移：在旧版飞星的「档案室 → 网站记录与备份」里导出完整备份，把 zip 拷过来在这里导入即可；也可以把整个 <code>%LOCALAPPDATA%\Feixing</code> 文件夹拷过来，用命令 <code>./feixing import 文件夹路径</code> 导入。
+          换电脑时：在旧电脑上导出完整备份，把 zip 拷过来在这里导入即可；也可以把整个数据文件夹拷过来，用命令 <code>./xinghen import 文件夹路径</code> 导入。
         </p>
       </section>
 

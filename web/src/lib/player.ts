@@ -47,7 +47,7 @@ export async function loadTracks(refresh = false) {
     const index = cur ? r.tracks.findIndex((t) => t.id === cur.id) : -1
     let saved = -1
     try {
-      saved = r.tracks.findIndex((t) => t.id === localStorage.getItem('feixing.track'))
+      saved = r.tracks.findIndex((t) => t.id === localStorage.getItem('xinghen.track'))
     } catch {
       /* ignore */
     }
@@ -66,7 +66,7 @@ function prepare(i: number, autoplay: boolean) {
   audio.src = `/api/music/file/${t.id}`
   player.set({ index: i, lyrics: [], error: '', duration: 0 })
   try {
-    localStorage.setItem('feixing.track', t.id)
+    localStorage.setItem('xinghen.track', t.id)
   } catch {
     /* ignore */
   }

@@ -13,7 +13,7 @@ import './settings.css'
 
 const WALL_NAMES: Record<string, string> = {
   'cn-courtyard': '中式天井',
-  'feixing-day': '白色相簿',
+  'xinghen-day': '白色相簿',
   'atri-flower': 'ATRI 花海',
   'cloud-sky': '云与天空',
   'cn-frame': '中式边框',
@@ -180,7 +180,7 @@ function MusicSection() {
     <section className="set-sec">
       <h3 className="set-title">本地音乐</h3>
       <p className="set-hint">
-        把音乐文件放进 <code>{dir || '~/.local/share/feixing/music'}</code>，支持 mp3、flac、m4a、ogg、opus、wav。同名的 .lrc 是歌词，同名图片或 cover.jpg 是封面。
+        把音乐文件放进 <code>{dir || '~/.local/share/xinghen/music'}</code>，支持 mp3、flac、m4a、ogg、opus、wav。同名的 .lrc 是歌词，同名图片或 cover.jpg 是封面。
       </p>
       <div className="set-inline">
         <span className="faint">现在有 {count} 首</span>
@@ -227,8 +227,8 @@ export default function Settings({ open, onClose }: { open: boolean; onClose: ()
         <Row label="极光">
           <Switch checked={p.aurora} onChange={(v) => prefs.set({ aurora: v })} label="极光" />
         </Row>
-        <Row label="飞星" hint="偶尔有流星划过；保存日记时也会有一颗">
-          <Switch checked={p.meteors} onChange={(v) => prefs.set({ meteors: v })} label="飞星" />
+        <Row label="流星" hint="偶尔有流星划过；保存日记时也会有一颗">
+          <Switch checked={p.meteors} onChange={(v) => prefs.set({ meteors: v })} label="流星" />
         </Row>
         <Row label="动效">
           <Tabs

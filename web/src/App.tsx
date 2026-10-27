@@ -54,7 +54,7 @@ function Shell() {
   const [palette, setPalette] = useState(false)
 
   useEffect(() => {
-    document.title = ROUTES.find((r) => r.path === path)?.title || '飞星'
+    document.title = ROUTES.find((r) => r.path === path)?.title || '星痕'
   }, [path])
   useLayoutEffect(() => {
     scrollTo({ top: 0 })
