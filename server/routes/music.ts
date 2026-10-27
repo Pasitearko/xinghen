@@ -10,6 +10,16 @@ import { DATA_DIR, MUSIC_DIR } from '../paths.ts'
 
 const AUDIO = new Set(['.mp3', '.flac', '.m4a', '.aac', '.ogg', '.opus', '.wav', '.webm'])
 const COVER_NAMES = ['cover', 'folder', 'front', 'album']
+const SHARED_COVERS = ['.jpg', '.jpeg', '.png', '.webp'].map((e) => join(MUSIC_DIR, `封面${e}`))
+
+/** 音乐根目录里的「封面.jpg」（png、webp 也行）覆盖所有歌曲的封面，不依赖曲库索引。 */
+async function sharedCoverFile() {
+  for (const f of SHARED_COVERS) {
+    const st = await stat(f).catch(() => null)
+    if (st?.isFile()) return f
+  }
+  return null
+}
 
 interface Picture {
   mime: string
@@ -293,6 +303,7 @@ route.get('/api/music/tracks', async (ctx) => {
   // 手动「重新扫描」或还没有索引时等扫完；平时直接用索引，后台顺便核对一遍（每次启动后第一次打开时）
   if (ctx.query.get('refresh') === '1' || !tracks.length) await scan()
   else if (!scannedAt) void scan()
+  const sharedCover = await sharedCoverFile()
   return {
     dir: MUSIC_DIR,
     tracks: tracks.map((t) => ({
@@ -301,7 +312,7 @@ route.get('/api/music/tracks', async (ctx) => {
       artist: t.artist,
       album: t.album,
       has_lyrics: !!t.lyrics,
-      has_cover: !!(t.picture || t.coverFile),
+      has_cover: !!(sharedCover || t.picture || t.coverFile),
       size: t.size,
     })),
   }
@@ -333,6 +344,8 @@ route.get('/api/music/lyrics/:id', async (ctx) => {
 route.get('/api/music/cover/:id', async (ctx) => {
   const t = await find(ctx.params.id)
   if (!t) fail(404, '没有封面')
+  const sharedCover = await sharedCoverFile()
+  if (sharedCover) return sendFile(ctx.req, ctx.res, sharedCover, { cache: 'private, no-cache' })
   if (t!.picture) {
     const fh = await open(t!.path, 'r')
     try {

@@ -22,8 +22,13 @@
   background: radial-gradient(circle, var(--sky-low) 18%, var(--sky-top) 19%, var(--sky-mid) 60%, var(--sky-top));
   color: var(--ink-3);
   box-shadow: 0 0 0 1px var(--glass-edge-hi), 0 6px 18px -6px rgba(0, 0, 0, 0.5);
-  animation: spin 18s linear infinite;
+  animation: player-disc-spin 18s linear infinite;
   animation-play-state: paused;
+}
+@keyframes player-disc-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .disc--spin {
   animation-play-state: running;

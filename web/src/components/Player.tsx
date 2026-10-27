@@ -126,9 +126,11 @@ const TrackList = memo(function TrackList({ tracks, index }: { tracks: Track[]; 
 const fmt = (s: number) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00')
 
 function Disc({ url, spinning, size }: { url: string; spinning: boolean; size: number }) {
+  // 封面图被删掉或挪走时，退回唱片图标，不显示破图
+  const [broken, setBroken] = useState('')
   return (
     <span className={`disc ${spinning ? 'disc--spin' : ''}`} style={{ width: size, height: size }}>
-      {url ? <img src={url} alt="" /> : <Music2 size={size * 0.4} />}
+      {url && broken !== url ? <img src={url} alt="" onError={() => setBroken(url)} /> : <Music2 size={size * 0.4} />}
     </span>
   )
 }
