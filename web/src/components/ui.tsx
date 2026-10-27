@@ -288,13 +288,26 @@ export function useSpotlight<T extends HTMLElement>() {
   useEffect(() => {
     const el = ref.current
     if (!el || matchMedia('(pointer: coarse)').matches) return
-    const move = (e: PointerEvent) => {
+    // 一帧里可能来好几次 pointermove，合并成一次读尺寸、一次写样式
+    let raf = 0
+    let x = 0
+    let y = 0
+    const paint = () => {
+      raf = 0
       const r = el.getBoundingClientRect()
-      el.style.setProperty('--mx', `${e.clientX - r.left}px`)
-      el.style.setProperty('--my', `${e.clientY - r.top}px`)
+      el.style.setProperty('--mx', `${x - r.left}px`)
+      el.style.setProperty('--my', `${y - r.top}px`)
+    }
+    const move = (e: PointerEvent) => {
+      x = e.clientX
+      y = e.clientY
+      if (!raf) raf = requestAnimationFrame(paint)
     }
     el.addEventListener('pointermove', move)
-    return () => el.removeEventListener('pointermove', move)
+    return () => {
+      el.removeEventListener('pointermove', move)
+      cancelAnimationFrame(raf)
+    }
   }, [])
   return ref
 }

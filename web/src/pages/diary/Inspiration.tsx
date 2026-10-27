@@ -2,7 +2,7 @@
 // 每个方向各自洗一副牌，一张张往下翻，翻完才重洗，所以短时间内不会重复。
 import { AnimatePresence, motion } from 'motion/react'
 import { PenLine, Shuffle } from 'lucide-react'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { EASE_OUT } from '../../lib/motion'
 import { PROMPT_COUNT, PROMPTS } from './prompts'
 
@@ -46,7 +46,8 @@ function restore(): { group: string; card: Card } {
   return { group: ALL, card: draw(ALL) }
 }
 
-export function Inspiration({ onUse }: { onUse: (question: string) => void }) {
+// 写字时整个书桌会跟着重渲染，这块和正文无关，props 不变就跳过
+export const Inspiration = memo(function Inspiration({ onUse }: { onUse: (question: string) => void }) {
   const [state, setState] = useState(restore)
   const { group, card } = state
   const [turns, setTurns] = useState(0)
@@ -108,4 +109,4 @@ export function Inspiration({ onUse }: { onUse: (question: string) => void }) {
       </div>
     </section>
   )
-}
+})

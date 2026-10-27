@@ -65,6 +65,8 @@ export function Editor({
 }) {
   const host = useRef<HTMLDivElement>(null)
   const view = useRef<EditorView | null>(null)
+  // 编辑器里当前正文的最后一份字符串（自己输入的和外部换进来的都记），用来跳过重复比较
+  const emitted = useRef(value)
   const [uploading, setUploading] = useState(0)
   const [dragging, setDragging] = useState(false)
   // 回调放进 ref，编辑器只建一次
@@ -114,7 +116,9 @@ export function Editor({
           placeholder('今天发生了什么，想到了什么……'),
           EditorView.contentAttributes.of({ spellcheck: 'false', 'aria-label': '正文' }),
           EditorView.updateListener.of((u) => {
-            if (u.docChanged && !u.transactions.some((t) => t.annotation(External))) cb.current.onChange(u.state.doc.toString())
+            if (!u.docChanged || u.transactions.some((t) => t.annotation(External))) return
+            emitted.current = u.state.doc.toString()
+            cb.current.onChange(emitted.current)
           }),
           EditorView.domEventHandlers({
             paste(e) {
@@ -148,9 +152,11 @@ export function Editor({
   // 换了一篇或用了另一个窗口的版本：整篇替换，光标尽量留在原处
   useEffect(() => {
     const v = view.current
-    if (!v || v.state.doc.toString() === value) return
+    // 自己刚发出去的内容又传回来（每次按键都会），不用再整篇比较
+    if (!v || value === emitted.current || v.state.doc.toString() === value) return
     const head = Math.min(v.state.selection.main.head, value.length)
     v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: value }, selection: { anchor: head }, annotations: External.of(true) })
+    emitted.current = value
   }, [value])
 
   useImperativeHandle(ref, () => ({

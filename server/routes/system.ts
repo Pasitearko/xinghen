@@ -20,12 +20,12 @@ route.patch('/api/news/sources/:key', async (ctx) => {
   return sourceList()
 })
 route.get('/api/backup', () => ({ dir: BACKUP_DIR, data_dir: DATA_DIR, music_dir: MUSIC_DIR, timezone: TZ, items: listBackups() }))
-route.post('/api/backup/export', () => {
-  const out = exportZip()
+route.post('/api/backup/export', async () => {
+  const out = await exportZip()
   return { name: out.name, size: out.size, counts: out.manifest.counts }
 })
-route.post('/api/backup/export-markdown', () => {
-  const out = exportMarkdown()
+route.post('/api/backup/export-markdown', async () => {
+  const out = await exportMarkdown()
   return { name: out.name, size: out.size, count: out.count }
 })
 route.get('/api/backup/download/:name', (ctx) => {

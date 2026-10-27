@@ -47,12 +47,9 @@ server.listen(PORT, HOST, () => {
   if (process.env.FEIXING_NO_JOBS !== '1') {
     startScheduler()
     setTimeout(() => {
-      try {
-        const b = autoBackup()
-        if (b) console.log(`[feixing] 已自动备份 ${b.name}`)
-      } catch (err) {
-        console.error('[feixing] 自动备份失败', err)
-      }
+      autoBackup()
+        .then((b) => b && console.log(`[feixing] 已自动备份 ${b.name}`))
+        .catch((err) => console.error('[feixing] 自动备份失败', err))
     }, 8000).unref()
   }
 })

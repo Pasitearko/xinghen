@@ -80,8 +80,8 @@ test('重复导入是幂等的', () => {
   assert.equal(all('SELECT * FROM diary_entries').length, 1)
 })
 
-test('本版导出的备份可以再导回', () => {
-  const out = exportZip()
+test('本版导出的备份可以再导回', async () => {
+  const out = await exportZip()
   const r = applyBundle(parseUpload(readFileSync(out.path)), true)
   assert.equal(r.kind, 'feixing-linux')
   assert.equal(r.diaries.skipped, 1)

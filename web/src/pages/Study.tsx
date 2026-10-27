@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Play, Plus, Square, Trash2, X } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Tabs, Ticker } from '../components/ui'
 import { api, type ScheduleItem, type StudySession, type StudyToday, type Todo } from '../lib/api'
@@ -12,11 +12,14 @@ import './study.css'
 
 const PRESETS = [25, 45, 60, 90]
 
-function useTick(active: boolean) {
-  const [, setN] = useState(0)
+/** 计时中每 250ms 看一眼剩余时间，但只在显示的秒数变了才重渲染（每秒一次） */
+function useSecondTick(active: boolean, read: () => number) {
+  const [, setSec] = useState(0)
+  const readRef = useRef(read)
+  readRef.current = read
   useEffect(() => {
     if (!active) return
-    const id = setInterval(() => setN((n) => n + 1), 250)
+    const id = setInterval(() => setSec(Math.ceil(readRef.current() / 1000)), 250)
     return () => clearInterval(id)
   }, [active])
 }
@@ -25,6 +28,14 @@ function mmss(ms: number) {
   const s = Math.ceil(ms / 1000)
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
+
+/** 刻度：60 格，像一圈星。固定不变，只算一次 */
+const TICKS = Array.from({ length: 60 }, (_, i) => {
+  const a = (i / 60) * Math.PI * 2 - Math.PI / 2
+  const r1 = 146
+  const r2 = i % 5 === 0 ? 141 : 143.5
+  return <line key={i} x1={150 + Math.cos(a) * r1} y1={150 + Math.sin(a) * r1} x2={150 + Math.cos(a) * r2} y2={150 + Math.sin(a) * r2} className="ring-tick" />
+})
 
 function Ring({ progress, tone }: { progress: number; tone: 'focus' | 'break' | 'idle' }) {
   const R = 132
@@ -37,13 +48,7 @@ function Ring({ progress, tone }: { progress: number; tone: 'focus' | 'break' | 
           <stop offset="1" stopColor="var(--ring-b)" />
         </linearGradient>
       </defs>
-      {/* 刻度：60 格，像一圈星 */}
-      {Array.from({ length: 60 }, (_, i) => {
-        const a = (i / 60) * Math.PI * 2 - Math.PI / 2
-        const r1 = 146
-        const r2 = i % 5 === 0 ? 141 : 143.5
-        return <line key={i} x1={150 + Math.cos(a) * r1} y1={150 + Math.sin(a) * r1} x2={150 + Math.cos(a) * r2} y2={150 + Math.sin(a) * r2} className="ring-tick" />
-      })}
+      {TICKS}
       <circle cx="150" cy="150" r={R} className="ring-track" />
       <motion.circle
         cx="150"
@@ -66,7 +71,7 @@ function Timer({ todos }: { todos: Todo[] }) {
   const [minutes, setMinutes] = useState(25)
   const [custom, setCustom] = useState(false)
   const [todoId, setTodoId] = useState<number | null>(null)
-  useTick(!!session || !!breakUntil)
+  useSecondTick(!!session || !!breakUntil, () => (session ? remaining() : Math.max(0, (breakUntil || 0) - Date.now())))
   const open = todos.filter((t) => !t.is_completed)
   const bound = session ? todos.find((t) => t.id === session.todo_id) : todos.find((t) => t.id === todoId)
 

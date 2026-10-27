@@ -163,7 +163,7 @@ function Composer({ day, startWith }: { day: DiaryDay; startWith: number | 'new'
 
   // 把问题作为一行引用接在正文末尾，光标停在它下面，直接开始答
   const editor = useRef<EditorHandle>(null)
-  const writeQuestion = (q: string) => editor.current?.appendBlock(`> ${q}`)
+  const writeQuestion = useCallback((q: string) => editor.current?.appendBlock(`> ${q}`), [])
 
   const words = useMemo(() => ed.form.content_md.replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/[#>*_`~\-\s]/g, '').length, [ed.form.content_md])
   const isDraft = !current

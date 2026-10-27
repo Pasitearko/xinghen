@@ -5,7 +5,7 @@
 // - 关页面前用 keepalive 请求把最后一点改动送出去。
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { api, ApiError, type DiaryEntry } from '../../lib/api'
+import { api, ApiError, type DiaryDay, type DiaryEntry } from '../../lib/api'
 
 export interface Form {
   title: string
@@ -69,7 +69,13 @@ export function useEntryEditor(date: string, onSaved?: (e: DiaryEntry) => void) 
       setSavedAt(new Date().toISOString())
       setState(r.dirty ? 'dirty' : 'saved')
       qc.setQueryData(['diary-entry', saved.id], saved)
-      void qc.invalidateQueries({ queryKey: ['diary-day', date] })
+      // 当天的列表直接换上刚存好的这篇，不必每次自动保存都把当天全文重新拉一遍
+      qc.setQueryData<DiaryDay>(['diary-day', date], (d) => {
+        if (!d) return d
+        const has = d.entries.some((e) => e.id === saved.id)
+        const entries = has ? d.entries.map((e) => (e.id === saved.id ? saved : e)) : [...d.entries, saved].sort((a, b) => a.entry_index - b.entry_index)
+        return { ...d, entries }
+      })
       void qc.invalidateQueries({ queryKey: ['diary-dates'] })
       void qc.invalidateQueries({ queryKey: ['diary-stats'] })
       onSaved?.(saved)

@@ -39,17 +39,33 @@ function Greeting({ text }: { text: string }) {
   )
 }
 
+/** 对齐到整秒/整分刷新；切回标签页时立刻校准一次（后台时计时器会被浏览器放慢） */
 function useNow(step = 1000) {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), step)
-    return () => clearInterval(id)
+    let id = 0
+    const tick = () => {
+      setNow(new Date())
+      id = window.setTimeout(tick, step - (Date.now() % step) + 20)
+    }
+    id = window.setTimeout(tick, step - (Date.now() % step) + 20)
+    const onVisible = () => {
+      if (document.hidden) return
+      clearTimeout(id)
+      tick()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearTimeout(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [step])
   return now
 }
 
 function Clock() {
-  const now = useNow(1000)
+  // 只显示时和分，整分钟刷新一次就够
+  const now = useNow(60_000)
   const hh = now.getHours()
   const mm = now.getMinutes()
   return (

@@ -164,7 +164,8 @@ function Particles({ kind }: { kind: 'snow' | 'rain' }) {
     const resize = () => {
       w = canvas.width = innerWidth
       h = canvas.height = innerHeight
-      const n = Math.round((w * h) / (kind === 'snow' ? 9000 : 6000))
+      // 数量跟着面积走，但大屏上封顶，2K/4K 屏不会多出几倍的粒子
+      const n = Math.min(kind === 'snow' ? 320 : 420, Math.round((w * h) / (kind === 'snow' ? 9000 : 6000)))
       ps = Array.from({ length: n }, () => make())
     }
     resize()

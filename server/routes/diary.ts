@@ -81,6 +81,8 @@ route.get('/api/diary/dates', (ctx) => {
   )
 })
 
+const LIST_COLUMNS = 'id, identity, version, date_key, entry_index, title, weather, mood, tags, char_count, excerpt, cover_url, created_at, updated_at'
+
 /** 档案室列表：按日期倒序分页，可按标签/心情筛选。 */
 route.get('/api/diary/list', (ctx) => {
   const page = int(ctx.query.get('page'), 1, 1)
@@ -89,14 +91,15 @@ route.get('/api/diary/list', (ctx) => {
   const where = tag ? `WHERE tags LIKE ?` : ''
   const args = tag ? [`%"${tag.replace(/["%_]/g, '')}"%`] : []
   const total = get<{ n: number }>(`SELECT COUNT(*) n FROM diary_entries ${where}`, ...args)!.n
+  // 列表只显示标题、摘要和字数，不读正文；排序走 (date_key, entry_index) 的唯一索引
   const rows = all<DiaryRow>(
-    `SELECT * FROM diary_entries ${where} ORDER BY date_key DESC, entry_index DESC LIMIT ? OFFSET ?`,
+    `SELECT ${LIST_COLUMNS} FROM diary_entries ${where} ORDER BY date_key DESC, entry_index DESC LIMIT ? OFFSET ?`,
     ...args,
     size,
     (page - 1) * size,
   )
   const today = todayKey()
-  return { total, page, size, items: rows.map((r) => ({ ...serialize(r, today), content_md: undefined })) }
+  return { total, page, size, items: rows.map((r) => serialize(r, today)) }
 })
 
 route.get('/api/diary/search', (ctx) => {

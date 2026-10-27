@@ -56,11 +56,13 @@
   width: calc(100% - 32px);
   height: calc(100% - 32px);
 }
+/* 闪烁和极光都慢得几乎看不出在动，没必要每秒出 60~144 帧：
+   上面每块毛玻璃都得跟着重新模糊一遍。用 steps() 压到每秒约 6 帧，每一步的变化小到看不出来，GPU 却能歇下来。 */
 .sky-stars-a {
-  animation: twinkle 7.5s ease-in-out infinite alternate;
+  animation: twinkle 7.5s steps(45) infinite alternate;
 }
 .sky-stars-b {
-  animation: twinkle 11s ease-in-out -4s infinite alternate-reverse;
+  animation: twinkle 11s steps(66) -4s infinite alternate-reverse;
 }
 @keyframes twinkle {
   from {
@@ -92,7 +94,7 @@
   left: -10vw;
   top: 4vh;
   background: radial-gradient(closest-side, rgba(92, 196, 190, 0.2), transparent);
-  animation: drift-a 58s ease-in-out infinite alternate;
+  animation: drift-a 58s steps(350) infinite alternate;
 }
 .aurora-b {
   width: 60vw;
@@ -100,7 +102,7 @@
   right: -12vw;
   top: -6vh;
   background: radial-gradient(closest-side, rgba(126, 116, 220, 0.24), transparent);
-  animation: drift-b 72s ease-in-out infinite alternate;
+  animation: drift-b 72s steps(430) infinite alternate;
 }
 .aurora-c {
   width: 50vw;
@@ -108,7 +110,7 @@
   left: 30vw;
   top: 26vh;
   background: radial-gradient(closest-side, rgba(220, 150, 190, 0.11), transparent);
-  animation: drift-c 84s ease-in-out infinite alternate;
+  animation: drift-c 84s steps(500) infinite alternate;
 }
 :root[data-theme='dawn'] .aurora-a {
   background: radial-gradient(closest-side, rgba(255, 214, 196, 0.55), transparent);

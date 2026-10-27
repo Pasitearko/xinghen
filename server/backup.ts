@@ -3,10 +3,12 @@
 // - 导入：本版导出的 ZIP、Windows 旧版飞星的 v4 ZIP、旧版飞星的数据目录（feixing.db + uploads/）、
 //   更早的旧站 JSON（扁平日记 / {diary, taste}）。导入是「合并」：已存在的条目跳过，不覆盖现有内容。
 import { createHash, randomUUID } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
-import { strToU8, unzipSync, zipSync, type Zippable } from 'fflate'
+import { Worker } from 'node:worker_threads'
+import { strToU8, unzipSync, type Zippable } from 'fflate'
+import { readFile, rename, writeFile } from 'node:fs/promises'
 import { all, get, kvGet, kvSet, parseJsonArray, run, tx } from './db.ts'
 import { HttpError } from './http.ts'
 import { BACKUP_DIR, UPLOAD_SCOPES } from './paths.ts'
@@ -25,16 +27,46 @@ function stamp() {
 }
 
 // ---------------- 导出 ----------------
+/** 压缩放到临时的后台线程里做（见 zip-worker.ts），主线程照常响应写日记、放歌这些请求 */
+function zipAsync(files: Zippable) {
+  return new Promise<Uint8Array>((resolve, reject) => {
+    const w = new Worker(new URL('./zip-worker.ts', import.meta.url))
+    w.once('message', (out: Uint8Array) => {
+      resolve(out)
+      void w.terminate()
+    })
+    w.once('error', reject)
+    w.once('exit', (code) => code !== 0 && reject(new Error(`压缩线程异常退出（${code}）`)))
+    w.postMessage(files)
+  })
+}
+
+/** 先写临时文件再改名，备份文件要么完整、要么不存在 */
+async function writeAtomic(target: string, data: Uint8Array) {
+  await writeFile(`${target}.tmp`, data)
+  await rename(`${target}.tmp`, target)
+}
+
+let exporting: ReturnType<typeof doExport> | null = null
+
+/** 同一时间只做一份完整备份：连点几次「导出」或碰上自动备份，都等同一份 */
 export function exportZip(prefix = 'feixing-backup') {
+  exporting ??= doExport(prefix).finally(() => (exporting = null))
+  return exporting
+}
+
+async function doExport(prefix: string) {
+  // 表一次性同步读完，拿到的是同一时刻的快照；之后的读图、压缩、写盘都是异步的
   const tables: Tables = {}
   for (const t of TABLES) tables[t] = all(`SELECT * FROM ${t}`)
   const files: Zippable = {}
   const attachments: string[] = []
   for (const img of tables.image_assets as { scope: string; filename: string }[]) {
     const p = imagePath(img.scope, img.filename)
-    if (p && existsSync(p)) {
+    const data = p ? await readFile(p).catch(() => null) : null
+    if (data) {
       // 图片本身已压缩，不再 deflate，导出快很多
-      files[`attachments/${img.scope}/${img.filename}`] = [readFileSync(p), { level: 0 }]
+      files[`attachments/${img.scope}/${img.filename}`] = [data, { level: 0 }]
       attachments.push(`${img.scope}/${img.filename}`)
     }
   }
@@ -50,19 +82,18 @@ export function exportZip(prefix = 'feixing-backup') {
   }
   files['manifest.json'] = strToU8(JSON.stringify(manifest, null, 2))
   files['tables.json'] = tablesJson
-  const zip = zipSync(files, { level: 6 })
+  const out = await zipAsync(files)
   const name = `${prefix}-${stamp()}.zip`
   const target = join(BACKUP_DIR, name)
-  writeFileSync(`${target}.tmp`, zip)
-  renameSync(`${target}.tmp`, target)
-  return { name, path: target, size: zip.length, manifest }
+  await writeAtomic(target, out)
+  return { name, path: target, size: out.length, manifest }
 }
 
 function safeName(s: string) {
   return s.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40)
 }
 
-export function exportMarkdown() {
+export async function exportMarkdown() {
   const rows = all<Row>('SELECT * FROM diary_entries ORDER BY date_key, entry_index')
   const files: Zippable = {}
   for (const r of rows) {
@@ -82,11 +113,11 @@ export function exportMarkdown() {
     const name = `${year}/${r.date_key}-${r.entry_index}${r.title ? '-' + safeName(String(r.title)) : ''}.md`
     files[name] = strToU8(`${head.join('\n')}\n${r.title ? `# ${r.title}\n\n` : ''}${r.content_md}\n`)
   }
-  const zip = zipSync(files, { level: 6 })
+  const out = await zipAsync(files)
   const name = `feixing-diary-markdown-${stamp()}.zip`
   const target = join(BACKUP_DIR, name)
-  writeFileSync(target, zip)
-  return { name, path: target, size: zip.length, count: rows.length }
+  await writeAtomic(target, out)
+  return { name, path: target, size: out.length, count: rows.length }
 }
 
 export function listBackups() {
@@ -104,11 +135,11 @@ export function listBackups() {
 }
 
 /** 每天第一次启动时自动备份，只保留最近 7 份自动备份。 */
-export function autoBackup() {
+export async function autoBackup() {
   const last = kvGet<string>('backup.auto_day', '')
   const hasData = get<{ n: number }>('SELECT (SELECT COUNT(*) FROM diary_entries) + (SELECT COUNT(*) FROM taste_items) n')!.n
   if (last === todayKey() || !hasData) return null
-  const out = exportZip('feixing-auto')
+  const out = await exportZip('feixing-auto')
   kvSet('backup.auto_day', todayKey())
   const autos = listBackups().filter((b) => b.auto)
   for (const old of autos.slice(7)) rmSync(join(BACKUP_DIR, old.name), { force: true })
